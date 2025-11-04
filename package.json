@@ -1,0 +1,32 @@
+{
+  "name": "sipaku",
+  "version": "1.0.0",
+  "description": "CodeIgniter is a PHP full-stack web framework that is light, fast, flexible and secure. More information can be found at the [official site](https://codeigniter.com).",
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "watch": "vite build --watch",
+    "preview": "vite preview"
+  },
+  "keywords": [],
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.1.16",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.7.1",
+    "tailwindcss": "^4.1.16",
+    "vite": "^7.1.12"
+  },
+  "dependencies": {
+    "@preline/overlay": "^3.2.3",
+    "datatables.net-dt": "^2.3.4",
+    "jquery": "^3.7.1",
+    "preline": "^3.2.3"
+  }
+}
