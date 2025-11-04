@@ -6,8 +6,35 @@ use CodeIgniter\Router\RouteCollection;
  * @var RouteCollection $routes
  */
 
+// Public routes
 $routes->get('/', 'Auth\Login::index');
-$routes->get('admin/dashboard', 'Admin\Dashboard::index');
+
+// Auth routes (untuk guest)
+$routes->group('', ['filter' => 'guest'], function($routes) {
+    $routes->get('login', 'Auth\Login::index');
+    $routes->post('login', 'Auth\Login::authenticate');
+});
+
+// Logout route (untuk authenticated user)
+$routes->get('logout', 'Auth\Login::logout', ['filter' => 'auth']);
+
+// Extend session route (AJAX)
+$routes->post('extend-session', 'Auth\Login::extendSession', ['filter' => 'auth']);
+
+// Admin routes (dengan auth filter)
+$routes->group('admin', ['filter' => 'auth:admin'], function($routes) {
+    $routes->get('dashboard', 'Admin\Dashboard::index');
+});
+
+// Dosen routes  
+$routes->group('dosen', ['filter' => 'auth:dosen'], function($routes) {
+    $routes->get('dashboard', 'Dosen\DosenController::dashboard');
+});
+
+// Mahasiswa routes
+$routes->group('mahasiswa', ['filter' => 'auth:mahasiswa'], function($routes) {
+    $routes->get('dashboard', 'Mahasiswa\MahasiswaController::dashboard');
+});
 $routes->get('admin/dashboard/getTabData/(:segment)', 'Admin\Dashboard::getTabData/$1');
 $routes->post('admin/dashboard/updateConfig', 'Admin\Dashboard::updateConfig');
 $routes->get('admin/dashboard/getConfig', 'Admin\Dashboard::getConfig');
@@ -41,6 +68,20 @@ $routes->post('admin/jadwal/checkConflict', 'Admin\Jadwal::checkConflict');
 $routes->post('admin/jadwal/update/(:segment)', 'Admin\Jadwal::update/$1');
 $routes->get('admin/jadwal/(:segment)', 'Admin\Jadwal::show/$1');
 $routes->delete('admin/jadwal/(:segment)', 'Admin\Jadwal::delete/$1');
+// Mata Kuliah routes
+$routes->get('admin/mata-kuliah', 'Admin\MataKuliah::index');
+$routes->post('admin/mata-kuliah', 'Admin\MataKuliah::create');
+$routes->post('admin/mata-kuliah/update/(:segment)', 'Admin\MataKuliah::update/$1');
+$routes->get('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::show/$1');
+$routes->delete('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::delete/$1');
+
+// Users routes
+$routes->get('admin/users', 'Admin\Users::index');
+$routes->post('admin/users', 'Admin\Users::create');
+$routes->post('admin/users/update/(:segment)', 'Admin\Users::update/$1');
+$routes->get('admin/users/(:segment)', 'Admin\Users::show/$1');
+$routes->delete('admin/users/(:segment)', 'Admin\Users::delete/$1');
+
 $routes->get('admin/test-empty', function() {
     return view('admin/test-empty', ['title' => 'Test Empty Page']);
 });

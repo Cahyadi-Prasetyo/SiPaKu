@@ -8,7 +8,7 @@
 </div>
 
 <!-- Stats Cards -->
-<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6 mb-8">
+<div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-4 sm:gap-6 mb-8">
     <!-- Total Mahasiswa -->
     <div class="bg-white rounded-lg shadow-lg p-6">
         <div class="flex items-center">
@@ -65,6 +65,21 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Jadwal</p>
                 <p class="text-2xl font-bold text-gray-900"><?= $stats['jadwal'] ?? '' ?></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Total Users -->
+    <div class="bg-white rounded-lg shadow-lg p-6">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-indigo-100 text-indigo-800">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"></path>
+                </svg>
+            </div>
+            <div class="ml-4">
+                <p class="text-sm font-medium text-gray-600">Total Users</p>
+                <p class="text-2xl font-bold text-gray-900"><?= $stats['users'] ?? '' ?></p>
             </div>
         </div>
     </div>

@@ -283,6 +283,36 @@
             }
         }
 
+        /* Navbar improvements */
+        #user-dropdown {
+            animation: slideDown 0.2s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Session indicator pulse animation */
+        #session-indicator {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
         /* Tablet positioning */
         @media (min-width: 641px) and (max-width: 1024px) {
             #toast-container {
@@ -483,7 +513,8 @@
             const userDropdown = document.getElementById('user-dropdown');
 
             if (userMenuButton && userDropdown) {
-                userMenuButton.addEventListener('click', function() {
+                userMenuButton.addEventListener('click', function(e) {
+                    e.stopPropagation();
                     userDropdown.classList.toggle('hidden');
                 });
 
@@ -493,12 +524,41 @@
                         userDropdown.classList.add('hidden');
                     }
                 });
+
+                // Close dropdown when pressing Escape
+                document.addEventListener('keydown', function(event) {
+                    if (event.key === 'Escape') {
+                        userDropdown.classList.add('hidden');
+                    }
+                });
             }
         });
 
         function logout() {
-            if (confirm('Apakah Anda yakin ingin logout?')) {
-                window.location.href = '<?= base_url('auth/logout') ?>';
+            // Close dropdown first
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userDropdown) {
+                userDropdown.classList.add('hidden');
+            }
+            
+            // Show confirmation with better styling
+            if (confirm('🔐 Apakah Anda yakin ingin logout?\n\nSesi Anda akan berakhir dan Anda perlu login kembali.')) {
+                // Show loading state
+                const button = event.target;
+                const originalText = button.innerHTML;
+                button.innerHTML = `
+                    <svg class="w-4 h-4 mr-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    Logging out...
+                `;
+                button.disabled = true;
+                
+                // Redirect after short delay for UX
+                setTimeout(() => {
+                    window.location.href = '<?= base_url('logout') ?>';
+                }, 500);
             }
         }
     </script>
@@ -659,6 +719,125 @@
         }
     </script>
     
+    <!-- Session Timeout Warning System -->
+    <script>
+        // Session Timeout Management
+        class SessionManager {
+            constructor() {
+                this.warningShown = false;
+                this.checkInterval = 60000; // Check every minute
+                this.warningTime = 300; // 5 minutes before timeout
+                this.sessionTimeout = 1800; // 30 minutes
+                
+                this.init();
+            }
+
+            init() {
+                // Check session status periodically
+                setInterval(() => {
+                    this.checkSessionStatus();
+                }, this.checkInterval);
+
+                // Reset activity on user interaction
+                this.resetActivityTimer();
+            }
+
+            checkSessionStatus() {
+                // Check if user is logged in
+                <?php if (session()->get('isLoggedIn')): ?>
+                    const sessionWarning = <?= session()->get('session_warning') ? 'true' : 'false' ?>;
+                    const timeRemaining = <?= session()->get('time_remaining') ?? 0 ?>;
+
+                    if (sessionWarning && !this.warningShown) {
+                        this.showSessionWarning(timeRemaining);
+                    }
+                <?php endif; ?>
+            }
+
+            showSessionWarning(timeRemaining) {
+                this.warningShown = true;
+                const minutes = Math.floor(timeRemaining / 60);
+                const seconds = timeRemaining % 60;
+                
+                // Show session indicator in navbar
+                const sessionIndicator = document.getElementById('session-indicator');
+                const sessionTime = document.getElementById('session-time');
+                if (sessionIndicator && sessionTime) {
+                    sessionIndicator.classList.remove('hidden');
+                    sessionTime.textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+                    
+                    // Update countdown every second
+                    const countdown = setInterval(() => {
+                        const newTimeRemaining = timeRemaining - (Date.now() - Date.now()) / 1000;
+                        if (newTimeRemaining <= 0) {
+                            clearInterval(countdown);
+                            sessionIndicator.classList.add('hidden');
+                            return;
+                        }
+                        const mins = Math.floor(newTimeRemaining / 60);
+                        const secs = Math.floor(newTimeRemaining % 60);
+                        sessionTime.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
+                    }, 1000);
+                }
+                
+                const warningToast = window.toast.warning(
+                    `⏰ Sesi Anda akan berakhir dalam ${minutes} menit. Klik di sini untuk memperpanjang sesi.`,
+                    15000 // Show for 15 seconds
+                );
+
+                // Add click handler to extend session
+                warningToast.addEventListener('click', () => {
+                    this.extendSession();
+                    window.toast.remove(warningToast);
+                    if (sessionIndicator) {
+                        sessionIndicator.classList.add('hidden');
+                    }
+                });
+            }
+
+            extendSession() {
+                // Make AJAX request to extend session
+                fetch('<?= base_url('extend-session') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+                    }
+                }).then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        this.warningShown = false;
+                        window.toast.success('Sesi berhasil diperpanjang');
+                    } else {
+                        window.toast.error('Gagal memperpanjang sesi');
+                    }
+                }).catch(error => {
+                    console.error('Error extending session:', error);
+                    window.toast.error('Terjadi kesalahan saat memperpanjang sesi');
+                });
+            }
+
+            resetActivityTimer() {
+                // Reset activity on various user interactions
+                const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
+                
+                events.forEach(event => {
+                    document.addEventListener(event, () => {
+                        this.warningShown = false;
+                    }, { passive: true });
+                });
+            }
+        }
+
+        // Initialize session manager for logged in users
+        <?php if (session()->get('isLoggedIn')): ?>
+            document.addEventListener('DOMContentLoaded', function() {
+                window.sessionManager = new SessionManager();
+            });
+        <?php endif; ?>
+    </script>
+
     <?= $this->renderSection('scripts') ?>
 </body>
 

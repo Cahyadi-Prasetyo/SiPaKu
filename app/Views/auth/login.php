@@ -24,15 +24,15 @@
             </div>
 
             <!-- Login Form -->
-            <form action="<?= base_url('auth/login') ?>" method="POST" class="space-y-6">
+            <form action="<?= base_url('login') ?>" method="POST" class="space-y-6">
                 <?= csrf_field() ?>
 
-                <!-- nim/Email Field -->
+                <!-- Kode Field -->
                 <div>
-                    <label for="nim" class="block text-sm font-medium text-gray-700 mb-2">
-                        nim
+                    <label for="kode" class="block text-sm font-medium text-gray-700 mb-2">
+                        Username (NIM/NIDN)
                     </label>
-                    <input type="text" id="nim" name="nim" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-800 focus:border-transparent transition duration-200 ease-in-out" placeholder="Masukkan nim " autocomplete="off" value="<?= old('nim') ?>">
+                    <input type="text" id="kode" name="kode" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-800 focus:border-transparent transition duration-200 ease-in-out" placeholder="Masukkan NIM/NIDN/Username" autocomplete="off" value="<?= old('kode') ?>">
                 </div>
 
                 <!-- Password Field -->
@@ -76,6 +76,17 @@
                     </div>
                 <?php endif; ?>
 
+                <?php if (session()->getFlashdata('success')): ?>
+                    <div class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-lg">
+                        <div class="flex items-center">
+                            <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                            </svg>
+                            <?= session()->getFlashdata('success') ?>
+                        </div>
+                    </div>
+                <?php endif; ?>
+
                 <!-- Login Button -->
                 <button type="submit"class="w-full bg-yellow-400 hover:bg-yellow-500 text-gray-800 font-semibold py-3 px-4 rounded-lg transition duration-200 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:ring-offset-2">
                     Masuk
@@ -112,10 +123,10 @@
 
         // Form validation
         document.querySelector('form').addEventListener('submit', function(e) {
-            const nim = document.getElementById('nim').value.trim();
+            const kode = document.getElementById('kode').value.trim();
             const password = document.getElementById('password').value;
 
-            if (!nim || !password) {
+            if (!kode || !password) {
                 e.preventDefault();
                 alert('Mohon lengkapi semua field yang diperlukan.');
             }

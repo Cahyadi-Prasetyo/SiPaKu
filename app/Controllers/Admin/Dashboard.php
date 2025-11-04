@@ -73,11 +73,15 @@ class Dashboard extends Controller
             // Count total jadwal
             $totalJadwal = $this->jadwalModel->countAll();
 
+            // Count total users (semua user di sistem)
+            $totalUsers = $this->userModel->countAll();
+
             return [
                 'mahasiswa' => $totalMahasiswa ?: 0,
                 'dosen' => $totalDosen ?: 0,
                 'ruangan' => $totalRuangan ?: 0,
-                'jadwal' => $totalJadwal ?: 0
+                'jadwal' => $totalJadwal ?: 0,
+                'users' => $totalUsers ?: 0
             ];
         } catch (\Exception $e) {
             // Fallback to default values if database error
@@ -86,7 +90,8 @@ class Dashboard extends Controller
                 'mahasiswa' => 0,
                 'dosen' => 0,
                 'ruangan' => 0,
-                'jadwal' => 0
+                'jadwal' => 0,
+                'users' => 0
             ];
         }
     }

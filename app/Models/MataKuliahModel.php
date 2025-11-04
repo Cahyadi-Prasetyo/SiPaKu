@@ -25,7 +25,7 @@ class MataKuliahModel extends Model
 
     // Validation
     protected $validationRules      = [
-        'kode_mata_kuliah' => 'required|min_length[3]|max_length[10]|is_unique[mata_kuliah.kode_mata_kuliah]',
+        'kode_mata_kuliah' => 'required|min_length[3]|max_length[10]',
         'nama_mata_kuliah' => 'required|min_length[3]|max_length[100]',
         'sks'              => 'required|integer|greater_than[0]|less_than_equal_to[6]'
     ];

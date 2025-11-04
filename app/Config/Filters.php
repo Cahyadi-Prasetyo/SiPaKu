@@ -24,6 +24,9 @@ class Filters extends BaseConfig
         'honeypot'      => Honeypot::class,
         'invalidchars'  => InvalidChars::class,
         'secureheaders' => SecureHeaders::class,
+        'auth'          => \App\Filters\AuthFilter::class,
+        'guest'         => \App\Filters\GuestFilter::class,
+        'session_timeout' => \App\Filters\SessionTimeoutFilter::class,
     ];
 
     /**
@@ -34,6 +37,7 @@ class Filters extends BaseConfig
      */
     public array $globals = [
         'before' => [
+            'session_timeout',
             // 'honeypot',
             // 'csrf',
             // 'invalidchars',

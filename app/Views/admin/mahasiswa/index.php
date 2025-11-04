@@ -872,10 +872,6 @@ function getAngkatanFromNIM($nim)
         });
     });
 
-
-
-
-
     // Emergency cleanup function
     function forceCloseAllModals() {
         const modal = document.getElementById('addMahasiswaModal');

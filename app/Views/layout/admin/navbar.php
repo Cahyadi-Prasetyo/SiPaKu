@@ -27,17 +27,28 @@
             </div>
 
             <!-- Right Side -->
-            <div class="flex items-center space-x-4">
+            <div class="flex items-center space-x-2 sm:space-x-4">
+                <!-- Session Status Indicator (Hidden by default, shown when warning) -->
+                <div id="session-indicator" class="hidden">
+                    <div class="flex items-center bg-yellow-100 text-yellow-800 px-2 py-1 rounded-full text-xs">
+                        <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span id="session-time">30:00</span>
+                    </div>
+                </div>
 
                 <!-- User Profile Dropdown -->
                 <div class="relative">
                     <button id="user-menu-button" class="flex items-center text-white hover:bg-blue-700 px-3 py-2 rounded-lg transition duration-300">
                         <div class="w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center mr-2">
-                            <span class="text-gray-800 font-semibold text-sm">A</span>
+                            <span class="text-gray-800 font-semibold text-sm">
+                                <?= strtoupper(substr(session()->get('nama_user') ?? 'U', 0, 1)) ?>
+                            </span>
                         </div>
                         <div class="text-left">
-                            <div class="text-sm font-medium"><?= session()->get('admin_name') ?? 'Admin' ?></div>
-                            <div class="text-xs text-yellow-400">Administrator</div>
+                            <div class="text-sm font-medium"><?= session()->get('nama_user') ?? 'User' ?></div>
+                            <div class="text-xs text-yellow-400"><?= ucfirst(session()->get('role') ?? 'Guest') ?></div>
                         </div>
                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
@@ -45,27 +56,51 @@
                     </button>
 
                     <!-- Dropdown Menu -->
-                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
-                        <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                            </svg>
-                            Profile
-                        </a>
-                        <!-- <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100">
-                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
-                            </svg>
-                            Pengaturan
-                        </a> -->
-                        <hr class="my-2">
-                        <button onclick="logout()" class="flex items-center w-full px-4 py-2 text-gray-700 hover:bg-gray-100">
-                            <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                            </svg>
-                            Logout
-                        </button>
+                    <div id="user-dropdown" class="hidden absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg py-2 z-50 border border-gray-200">
+                        <!-- User Info Header -->
+                        <div class="px-4 py-3 border-b border-gray-100">
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 bg-yellow-400 rounded-full flex items-center justify-center mr-3">
+                                    <span class="text-gray-800 font-semibold">
+                                        <?= strtoupper(substr(session()->get('nama_user') ?? 'U', 0, 1)) ?>
+                                    </span>
+                                </div>
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900"><?= session()->get('nama_user') ?? 'User' ?></div>
+                                    <div class="text-xs text-gray-500"><?= session()->get('kode') ?? '' ?></div>
+                                    <div class="text-xs text-blue-600 font-medium"><?= ucfirst(session()->get('role') ?? 'Guest') ?></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Menu Items -->
+                        <div class="py-1">
+                            <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                Profile Saya
+                            </a>
+                            <a href="#" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                Pengaturan
+                            </a>
+                        </div>
+                        
+                        <hr class="my-1">
+                        
+                        <!-- Logout Button -->
+                        <div class="py-1">
+                            <button onclick="logout()" class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">
+                                <svg class="w-4 h-4 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                                </svg>
+                                Logout
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
