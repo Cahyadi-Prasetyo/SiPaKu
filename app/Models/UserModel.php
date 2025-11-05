@@ -134,4 +134,162 @@ class UserModel extends Model
     {
         return $this->getUsersByRole('mahasiswa');
     }
+
+    /**
+     * Create user account untuk mahasiswa
+     */
+    public function createMahasiswaAccount($nim, $nama)
+    {
+        // Cek apakah user sudah ada
+        $existingUser = $this->findByKode($nim);
+        
+        if ($existingUser) {
+            return ['success' => false, 'message' => 'User account sudah ada'];
+        }
+
+        $userData = [
+            'nama_user' => $nama,
+            'role'      => 'mahasiswa',
+            'kode'      => $nim,
+            'password'  => $nim
+        ];
+
+        try {
+            $result = $this->insert($userData);
+            if ($result) {
+                return ['success' => true, 'message' => 'User account berhasil dibuat', 'id' => $result];
+            } else {
+                return ['success' => false, 'message' => 'Gagal membuat user account'];
+            }
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Create user account untuk dosen
+     */
+    public function createDosenAccount($nidn, $nama)
+    {
+        // Cek apakah user sudah ada
+        $existingUser = $this->findByKode($nidn);
+        
+        if ($existingUser) {
+            return ['success' => false, 'message' => 'User account sudah ada'];
+        }
+
+        $userData = [
+            'nama_user' => $nama,
+            'role'      => 'dosen',
+            'kode'      => $nidn,
+            'password'  => $nidn
+        ];
+
+        try {
+            $result = $this->insert($userData);
+            if ($result) {
+                return ['success' => true, 'message' => 'User account berhasil dibuat', 'id' => $result];
+            } else {
+                return ['success' => false, 'message' => 'Gagal membuat user account'];
+            }
+        } catch (\Exception $e) {
+            return ['success' => false, 'message' => 'Error: ' . $e->getMessage()];
+        }
+    }
+
+    /**
+     * Bulk create user accounts untuk mahasiswa yang belum punya account
+     */
+    public function bulkCreateMahasiswaAccounts()
+    {
+        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $allMahasiswa = $mahasiswaModel->findAll();
+        
+        $created = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($allMahasiswa as $mahasiswa) {
+            // Cek apakah user sudah ada
+            $existingUser = $this->findByKode($mahasiswa['nim']);
+            
+            if ($existingUser) {
+                $skipped++;
+                continue;
+            }
+
+            // Direct insert tanpa callback untuk menghindari konflik
+            $userData = [
+                'nama_user' => $mahasiswa['nama'],
+                'role'      => 'mahasiswa',
+                'kode'      => $mahasiswa['nim'],
+                'password'  => password_hash($mahasiswa['nim'], PASSWORD_DEFAULT)
+            ];
+
+            try {
+                $result = $this->insert($userData, false); // false = skip callbacks
+                if ($result) {
+                    $created++;
+                } else {
+                    $errors[] = "NIM {$mahasiswa['nim']}: Gagal insert ke database";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "NIM {$mahasiswa['nim']}: {$e->getMessage()}";
+            }
+        }
+
+        return [
+            'created' => $created,
+            'skipped' => $skipped,
+            'errors' => $errors
+        ];
+    }
+
+    /**
+     * Bulk create user accounts untuk dosen yang belum punya account
+     */
+    public function bulkCreateDosenAccounts()
+    {
+        $dosenModel = new \App\Models\DosenModel();
+        $allDosen = $dosenModel->findAll();
+        
+        $created = 0;
+        $skipped = 0;
+        $errors = [];
+
+        foreach ($allDosen as $dosen) {
+            // Cek apakah user sudah ada
+            $existingUser = $this->findByKode($dosen['nidn']);
+            
+            if ($existingUser) {
+                $skipped++;
+                continue;
+            }
+
+            // Direct insert tanpa callback untuk menghindari konflik
+            $userData = [
+                'nama_user' => $dosen['nama'],
+                'role'      => 'dosen',
+                'kode'      => $dosen['nidn'],
+                'password'  => password_hash($dosen['nidn'], PASSWORD_DEFAULT)
+            ];
+
+            try {
+                $result = $this->insert($userData, false); // false = skip callbacks
+                if ($result) {
+                    $created++;
+                } else {
+                    $errors[] = "NIDN {$dosen['nidn']}: Gagal insert ke database";
+                }
+            } catch (\Exception $e) {
+                $errors[] = "NIDN {$dosen['nidn']}: {$e->getMessage()}";
+            }
+        }
+
+        return [
+            'created' => $created,
+            'skipped' => $skipped,
+            'errors' => $errors
+        ];
+    }
 }

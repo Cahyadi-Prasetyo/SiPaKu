@@ -115,10 +115,7 @@
                         </svg>
                         Tambah User
                     </button>
-                    <!-- Debug button -->
-                    <button type="button" onclick="console.log('Debug button clicked'); openModal();" class="py-2 px-3 text-sm font-medium rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-50">
-                        Debug Modal
-                    </button>
+                   
                 </div>
             </div>
         </div>

@@ -72,7 +72,7 @@
                                 </div>
                             </div>
                         </div>
-                        
+
                         <!-- Menu Items -->
                         <div class="py-1">
                             <a href="#" onclick="showDevelopmentToast('Profile Saya')" class="flex items-center px-4 py-2 text-gray-700 hover:bg-gray-100 transition-colors">
@@ -89,9 +89,9 @@
                                 Pengaturan
                             </a>
                         </div>
-                        
+
                         <hr class="my-1">
-                        
+
                         <!-- Logout Button -->
                         <div class="py-1">
                             <button onclick="logout()" class="flex items-center w-full px-4 py-2 text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors">

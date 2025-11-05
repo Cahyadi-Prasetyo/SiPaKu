@@ -15,6 +15,7 @@ $routes->group('', ['filter' => 'guest'], function($routes) {
     $routes->post('login', 'Auth\Login::authenticate');
 });
 
+
 // Logout route (untuk authenticated user)
 $routes->get('logout', 'Auth\Login::logout', ['filter' => 'auth']);
 
@@ -75,12 +76,17 @@ $routes->post('admin/mata-kuliah/update/(:segment)', 'Admin\MataKuliah::update/$
 $routes->get('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::show/$1');
 $routes->delete('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::delete/$1');
 
-// Users routes
-$routes->get('admin/users', 'Admin\Users::index');
-$routes->post('admin/users', 'Admin\Users::create');
-$routes->post('admin/users/update/(:segment)', 'Admin\Users::update/$1');
-$routes->get('admin/users/(:segment)', 'Admin\Users::show/$1');
-$routes->delete('admin/users/(:segment)', 'Admin\Users::delete/$1');
+// // Users routes
+// $routes->get('admin/users', 'Admin\Users::index');
+// $routes->post('admin/users', 'Admin\Users::create');
+// $routes->post('admin/users/update/(:segment)', 'Admin\Users::update/$1');
+// $routes->get('admin/users/(:segment)', 'Admin\Users::show/$1');
+// $routes->delete('admin/users/(:segment)', 'Admin\Users::delete/$1');
+
+// Bulk operations routes
+$routes->post('admin/users/bulk-create-mahasiswa', 'Admin\Users::bulkCreateMahasiswa');
+$routes->post('admin/users/bulk-create-dosen', 'Admin\Users::bulkCreateDosen');
+$routes->post('admin/users/test-auto-generate', 'Admin\Users::testAutoGenerate');
 
 $routes->get('admin/test-empty', function() {
     return view('admin/test-empty', ['title' => 'Test Empty Page']);

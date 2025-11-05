@@ -200,4 +200,135 @@ class Users extends BaseController
             'message' => 'Gagal menghapus user'
         ]);
     }
+
+    /**
+     * Bulk create user accounts untuk semua mahasiswa
+     */
+    public function bulkCreateMahasiswa()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        try {
+            $result = $this->userModel->bulkCreateMahasiswaAccounts();
+            
+            $message = "Bulk create selesai. ";
+            $message .= "Dibuat: {$result['created']}, ";
+            $message .= "Dilewati: {$result['skipped']}";
+            
+            if (!empty($result['errors'])) {
+                $message .= ", Error: " . count($result['errors']);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => $message,
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Bulk create user accounts untuk semua dosen
+     */
+    public function bulkCreateDosen()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        try {
+            $result = $this->userModel->bulkCreateDosenAccounts();
+            
+            $message = "Bulk create selesai. ";
+            $message .= "Dibuat: {$result['created']}, ";
+            $message .= "Dilewati: {$result['skipped']}";
+            
+            if (!empty($result['errors'])) {
+                $message .= ", Error: " . count($result['errors']);
+            }
+
+            return $this->response->setJSON([
+                'success' => true,
+                'message' => $message,
+                'data' => $result
+            ]);
+        } catch (\Exception $e) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Error: ' . $e->getMessage()
+            ]);
+        }
+    }
+
+    /**
+     * Test auto-generate functionality
+     */
+    public function testAutoGenerate()
+    {
+        if (!$this->request->isAJAX()) {
+            return redirect()->back();
+        }
+
+        $type = $this->request->getPost('type'); // 'mahasiswa' atau 'dosen'
+        
+        if ($type === 'mahasiswa') {
+            // Test dengan data dummy mahasiswa
+            $mahasiswaModel = new \App\Models\MahasiswaModel();
+            $testData = [
+                'nim' => 'TEST' . time(),
+                'nama' => 'Test Mahasiswa ' . date('H:i:s')
+            ];
+            
+            try {
+                $result = $mahasiswaModel->insert($testData);
+                if ($result) {
+                    return $this->response->setJSON([
+                        'success' => true,
+                        'message' => 'Test mahasiswa berhasil dibuat. User account otomatis terbuat.',
+                        'data' => $testData
+                    ]);
+                }
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+        } elseif ($type === 'dosen') {
+            // Test dengan data dummy dosen
+            $dosenModel = new \App\Models\DosenModel();
+            $testData = [
+                'nidn' => 'TEST' . time(),
+                'nama' => 'Test Dosen ' . date('H:i:s')
+            ];
+            
+            try {
+                $result = $dosenModel->insert($testData);
+                if ($result) {
+                    return $this->response->setJSON([
+                        'success' => true,
+                        'message' => 'Test dosen berhasil dibuat. User account otomatis terbuat.',
+                        'data' => $testData
+                    ]);
+                }
+            } catch (\Exception $e) {
+                return $this->response->setJSON([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+        }
+
+        return $this->response->setJSON([
+            'success' => false,
+            'message' => 'Tipe test tidak valid'
+        ]);
+    }
 }

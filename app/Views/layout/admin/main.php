@@ -541,25 +541,19 @@
                 userDropdown.classList.add('hidden');
             }
             
-            // Show confirmation with better styling
-            if (confirm('🔐 Apakah Anda yakin ingin logout?\n\nSesi Anda akan berakhir dan Anda perlu login kembali.')) {
-                // Show loading state
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = `
-                    <svg class="w-4 h-4 mr-3 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    Logging out...
-                `;
-                button.disabled = true;
+            // Show loading toast immediately
+            const loadingToast = window.toast.info('⏳ Sedang logout...', 5000);
+            
+            // Simulate logout process
+            setTimeout(() => {
+                window.toast.remove(loadingToast);
+                window.toast.success('✅ Logout berhasil! Mengalihkan...', 2000);
                 
-                // Redirect after short delay for UX
+                // Redirect after success message
                 setTimeout(() => {
                     window.location.href = '<?= base_url('logout') ?>';
-                }, 500);
-            }
+                }, 1500);
+            }, 800);
         }
     </script>
     <!-- Load compiled JavaScript -->
@@ -716,6 +710,19 @@
 
         function showInfo(message, duration = 5000) {
             return window.toast.info(message, duration);
+        }
+
+        // Development Toast Function
+        function showDevelopmentToast(featureName) {
+            // Close user dropdown first
+            const userDropdown = document.getElementById('user-dropdown');
+            if (userDropdown) {
+                userDropdown.classList.add('hidden');
+            }
+            
+            // Show development toast with custom styling
+            const message = `🚧 ${featureName} sedang dalam tahap pengembangan dan akan segera tersedia!`;
+            return window.toast.info(message, 4000);
         }
     </script>
     

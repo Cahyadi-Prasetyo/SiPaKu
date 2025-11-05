@@ -6,7 +6,7 @@ use CodeIgniter\Model;
 
 class RencanaStudiModel extends Model
 {
-    protected $table            = 'rencanastudi';
+    protected $table            = 'rencana_studi';
     protected $primaryKey       = 'id';
     protected $useAutoIncrement = true;
     protected $returnType       = 'array';
