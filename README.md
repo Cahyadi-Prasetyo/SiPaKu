@@ -233,9 +233,8 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 Jika mengalami masalah atau memiliki pertanyaan:
 
-1. **Issues**: [GitHub Issues](https://github.com/your-username/sipaku/issues)
-2. **Documentation**: [Wiki](https://github.com/your-username/sipaku/wiki)
-3. **Email**: support@sipaku.com
+1. **Issues**: [GitHub Issues](https://github.com/Cahyadi-Prasetyo/sipaku/issues)
+2. **Documentation**: [Wiki](https://github.com/Cahyadi-Prasetyo/sipaku/wiki)
 
 ## 🙏 Acknowledgments
 
