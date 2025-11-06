@@ -144,20 +144,6 @@ sipaku/
 └── writable/               # Writable directories
 ```
 
-## 🔐 Default Login
-
-### Admin
-- **Username**: `admin`
-- **Password**: `admin123`
-
-### Dosen (Demo)
-- **Username**: `dosen001`
-- **Password**: `password`
-
-### Mahasiswa (Demo)
-- **Username**: `mhs001`
-- **Password**: `password`
-
 ## 🎨 UI Components
 
 Aplikasi menggunakan komponen UI modern dengan:
