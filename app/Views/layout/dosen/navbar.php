@@ -52,9 +52,9 @@
                                 <?= strtoupper(substr(session()->get('nama_user') ?? 'D', 0, 1)) ?>
                             </span>
                         </div>
-                        <div class="text-left">
+                        <div class="text-left sm:block">
                             <div class="text-sm font-medium"><?= session()->get('nama_user') ?? 'Dosen' ?></div>
-                            <div class="text-xs text-yellow-400">NIDN: <?= session()->get('kode') ?? '-' ?></div>
+                            <!-- <div class="text-xs text-yellow-400">NIDN: <?= session()->get('kode') ?? '-' ?></div> -->
                         </div>
                         <svg class="w-4 h-4 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
