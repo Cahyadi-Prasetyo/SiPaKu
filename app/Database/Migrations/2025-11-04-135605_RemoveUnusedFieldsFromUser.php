@@ -8,34 +8,13 @@ class RemoveUnusedFieldsFromUser extends Migration
 {
     public function up()
     {
-        // Menghapus field yang tidak diperlukan dari tabel user
-        $this->forge->dropColumn('user', ['email', 'nim', 'nidn']);
+        // Migration ini tidak diperlukan karena field email, nim, nidn 
+        // tidak ada di struktur tabel user yang final
+        // Dibiarkan kosong untuk menghindari error
     }
 
     public function down()
     {
-        // Menambahkan kembali field jika rollback
-        $fields = [
-            'email' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '100',
-                'null'       => true,
-                'after'      => 'nama_user',
-            ],
-            'nim' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '20',
-                'null'       => true,
-                'after'      => 'password',
-            ],
-            'nidn' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '20',
-                'null'       => true,
-                'after'      => 'nim',
-            ],
-        ];
-        
-        $this->forge->addColumn('user', $fields);
+        // Tidak ada yang perlu di-rollback
     }
 }

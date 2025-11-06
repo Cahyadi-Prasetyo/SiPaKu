@@ -32,6 +32,6 @@ class Mahasiswa extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('mahasiswa');
     }
 }

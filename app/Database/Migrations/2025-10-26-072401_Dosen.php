@@ -32,6 +32,6 @@ class Dosen extends Migration
 
     public function down()
     {
-        //
+        $this->forge->dropTable('dosen');
     }
 }

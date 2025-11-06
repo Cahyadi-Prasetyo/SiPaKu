@@ -556,8 +556,6 @@
             }, 800);
         }
     </script>
-    <!-- Load compiled JavaScript -->
-    <!-- Toast Notification Container -->
 
     <script src="<?= base_url('assets/js/main.js') ?>"></script>
     

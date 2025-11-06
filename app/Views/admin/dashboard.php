@@ -161,7 +161,7 @@
                 <span class="text-sm font-medium text-gray-700">Kelola Jadwal</span>
             </a>
         </div>
-        
+
         <!-- Additional Quick Actions -->
         <div class="mt-6 pt-4 border-t border-gray-200">
             <h4 class="text-sm font-medium text-gray-700 mb-3">Fitur Tambahan</h4>
@@ -178,7 +178,7 @@
                     </svg>
                     <span class="text-sm font-medium text-gray-700">Statistik Detail</span>
                 </button>
-                
+
                 <!-- Test Toast Button (temporary)
                 <button onclick="testToast()" class="flex items-center p-3 bg-purple-50 hover:bg-purple-100 rounded-lg transition duration-200">
                     <svg class="w-5 h-5 text-purple-600 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -188,7 +188,7 @@
                 </button> -->
             </div>
         </div>
-        
+
         <!-- Configuration Info -->
         <div class="mt-4 p-3 bg-gray-50 rounded-lg">
             <h4 class="text-sm font-medium text-gray-700 mb-2">Konfigurasi Dashboard</h4>
@@ -199,8 +199,8 @@
                 <div>Auto Refresh: 5 menit</div>
             </div>
         </div>
-        </div>
     </div>
+</div>
 </div>
 
 <!-- Data Tables Preview -->
@@ -224,7 +224,7 @@
             </a>
         </div>
     </div>
-    
+
     <!-- Tabs -->
     <div class="border-b border-gray-200 mb-4">
         <nav class="-mb-px flex space-x-4 sm:space-x-8 overflow-x-auto" id="data-tabs">
@@ -321,7 +321,7 @@
                 </svg>
             </button>
         </div>
-        
+
         <!-- Modal Body -->
         <div class="p-6">
             <div class="mb-4">
@@ -333,20 +333,20 @@
                     <option value="jadwal">Jadwal (Kelas/Mata Kuliah)</option>
                 </select>
             </div>
-            
+
             <div class="mb-4">
                 <label for="searchQuery" class="block text-sm font-medium text-gray-700 mb-2">Kata Kunci:</label>
                 <input type="text" id="searchQuery" placeholder="Masukkan kata kunci pencarian..."
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
             </div>
-            
+
             <button onclick="performSearch()" class="w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors">
                 <svg class="w-5 h-5 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                 </svg>
                 Cari Sekarang
             </button>
-            
+
             <!-- Search Results -->
             <div id="searchResults" class="mt-6 hidden">
                 <h4 class="text-sm font-medium text-gray-700 mb-3">Hasil Pencarian:</h4>
@@ -370,7 +370,7 @@
                 </svg>
             </button>
         </div>
-        
+
         <!-- Modal Body -->
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -517,7 +517,7 @@
                 </div>
             </div>
         </div>
-        
+
         <!-- Modal Footer -->
         <div class="flex justify-end space-x-3 p-6 border-t border-gray-200">
             <button onclick="refreshStats()" class="px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors">
@@ -537,105 +537,105 @@
 
 <?= $this->section('scripts') ?>
 <script>
-// Configuration
-const baseUrl = '<?= base_url() ?>';
+    // Configuration
+    const baseUrl = '<?= base_url() ?>';
 
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize tab functionality
-    initializeTabs();
-    
-    // Set initial header for mahasiswa (already set in PHP, but ensure consistency)
-    setTableHeader('mahasiswa');
-    
-    // Update initial data info
-    updateDataInfo(<?= count($recent_data) ?>, 'mahasiswa');
-});
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize tab functionality
+        initializeTabs();
 
-function initializeTabs() {
-    const tabButtons = document.querySelectorAll('.tab-button');
-    
-    tabButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const tabType = this.getAttribute('data-tab');
-            showTab(tabType);
-            
-            // Update active tab styling
-            tabButtons.forEach(btn => {
-                btn.classList.remove('border-blue-800', 'text-blue-800');
-                btn.classList.add('border-transparent', 'text-gray-500');
+        // Set initial header for mahasiswa (already set in PHP, but ensure consistency)
+        setTableHeader('mahasiswa');
+
+        // Update initial data info
+        updateDataInfo(<?= count($recent_data) ?>, 'mahasiswa');
+    });
+
+    function initializeTabs() {
+        const tabButtons = document.querySelectorAll('.tab-button');
+
+        tabButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                const tabType = this.getAttribute('data-tab');
+                showTab(tabType);
+
+                // Update active tab styling
+                tabButtons.forEach(btn => {
+                    btn.classList.remove('border-blue-800', 'text-blue-800');
+                    btn.classList.add('border-transparent', 'text-gray-500');
+                });
+
+                this.classList.remove('border-transparent', 'text-gray-500');
+                this.classList.add('border-blue-800', 'text-blue-800');
             });
-            
-            this.classList.remove('border-transparent', 'text-gray-500');
-            this.classList.add('border-blue-800', 'text-blue-800');
         });
-    });
-}
+    }
 
-function showTab(tabType) {
-    console.log('Switching to tab:', tabType);
-    
-    // Show loading
-    showLoading(true);
-    hideError();
-    
-    // Update table header
-    setTableHeader(tabType);
-    
-    // Fetch data via AJAX
-    fetch(`${baseUrl}/admin/dashboard/getTabData/${tabType}`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest',
-            'Content-Type': 'application/json'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        showLoading(false);
-        
-        if (data.success) {
-            updateTableContent(data.data, data.type);
-        } else {
-            showError(data.error || 'Gagal memuat data');
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        showLoading(false);
-        showError('Terjadi kesalahan saat memuat data');
-    });
-}
+    function showTab(tabType) {
+        console.log('Switching to tab:', tabType);
 
-function setTableHeader(type) {
-    const tableHeader = document.getElementById('table-header');
-    let headerHTML = '';
-    
-    switch(type) {
-        case 'mahasiswa':
-            headerHTML = `
+        // Show loading
+        showLoading(true);
+        hideError();
+
+        // Update table header
+        setTableHeader(tabType);
+
+        // Fetch data via AJAX
+        fetch(`${baseUrl}/admin/dashboard/getTabData/${tabType}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                showLoading(false);
+
+                if (data.success) {
+                    updateTableContent(data.data, data.type);
+                } else {
+                    showError(data.error || 'Gagal memuat data');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showLoading(false);
+                showError('Terjadi kesalahan saat memuat data');
+            });
+    }
+
+    function setTableHeader(type) {
+        const tableHeader = document.getElementById('table-header');
+        let headerHTML = '';
+
+        switch (type) {
+            case 'mahasiswa':
+                headerHTML = `
                 <tr>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">NIM</th>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                 </tr>
             `;
-            break;
-        case 'dosen':
-            headerHTML = `
+                break;
+            case 'dosen':
+                headerHTML = `
                 <tr>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">NIDN</th>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Nama</th>
                 </tr>
             `;
-            break;
-        case 'ruangan':
-            headerHTML = `
+                break;
+            case 'ruangan':
+                headerHTML = `
                 <tr>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Nama Ruangan</th>
                 </tr>
             `;
-            break;
-        case 'jadwal':
-            headerHTML = `
+                break;
+            case 'jadwal':
+                headerHTML = `
                 <tr>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Kelas</th>
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Mata Kuliah</th>
@@ -643,57 +643,57 @@ function setTableHeader(type) {
                     <th class="px-3 sm:px-6 py-2 sm:py-3 text-left text-xs sm:text-sm font-medium text-gray-500 uppercase tracking-wider">Hari & Jam</th>
                 </tr>
             `;
-            break;
-    }
-    
-    tableHeader.innerHTML = headerHTML;
-}
+                break;
+        }
 
-function updateTableContent(data, type) {
-    const tableBody = document.getElementById('table-body');
-    let rowsHTML = '';
-    
-    if (data && data.length > 0) {
-        data.forEach(item => {
-            rowsHTML += generateTableRow(item, type);
-        });
-    } else {
-        rowsHTML = `
+        tableHeader.innerHTML = headerHTML;
+    }
+
+    function updateTableContent(data, type) {
+        const tableBody = document.getElementById('table-body');
+        let rowsHTML = '';
+
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                rowsHTML += generateTableRow(item, type);
+            });
+        } else {
+            rowsHTML = `
             <tr>
                 <td colspan="5" class="px-6 py-4 text-center text-gray-500">
                     Tidak ada data ${type}
                 </td>
             </tr>
         `;
-    }
-    
-    tableBody.innerHTML = rowsHTML;
-}
+        }
 
-function generateTableRow(item, type) {
-    switch(type) {
-        case 'mahasiswa':
-            return `
+        tableBody.innerHTML = rowsHTML;
+    }
+
+    function generateTableRow(item, type) {
+        switch (type) {
+            case 'mahasiswa':
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.nim || 'N/A'}</td>
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">${item.nama || 'N/A'}</td>
                 </tr>
             `;
-        case 'dosen':
-            return `
+            case 'dosen':
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.nidn || 'N/A'}</td>
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">${item.nama || 'N/A'}</td>
                 </tr>
             `;
-        case 'ruangan':
-            return `
+            case 'ruangan':
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">${item.nama_ruangan || 'N/A'}</td>
                 </tr>
             `;
-        case 'jadwal':
-            return `
+            case 'jadwal':
+                return `
                 <tr class="hover:bg-gray-50">
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm font-medium text-gray-900">${item.nama_kelas || 'N/A'}</td>
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-900">${item.nama_mata_kuliah || 'N/A'}</td>
@@ -701,183 +701,183 @@ function generateTableRow(item, type) {
                     <td class="px-3 sm:px-6 py-3 sm:py-4 whitespace-nowrap text-sm text-gray-500">${item.hari || 'N/A'} ${item.jam || ''}</td>
                 </tr>
             `;
-        default:
-            return '';
-    }
-}
-
-function getProdiName(nim) {
-    if (!nim) return 'N/A';
-    
-    const nimPrefix = nim.toString().substring(0, 2);
-    
-    switch (nimPrefix) {
-        case '11':
-            return 'Teknik Informatika';
-        case '12':
-            return 'Sistem Informasi';
-        case '13':
-            return 'Teknik Komputer';
-        default:
-            return 'Program Studi';
-    }
-}
-
-function showLoading(show) {
-    const loading = document.getElementById('table-loading');
-    const tableContainer = document.getElementById('table-container');
-    
-    if (show) {
-        loading.classList.remove('hidden');
-        tableContainer.classList.add('hidden');
-    } else {
-        loading.classList.add('hidden');
-        tableContainer.classList.remove('hidden');
-    }
-}
-
-function showError(message) {
-    const errorDiv = document.getElementById('error-message');
-    const tableContainer = document.getElementById('table-container');
-    
-    errorDiv.querySelector('p:last-child').textContent = message || 'Silakan refresh halaman atau coba lagi nanti';
-    errorDiv.classList.remove('hidden');
-    tableContainer.classList.add('hidden');
-}
-
-function hideError() {
-    const errorDiv = document.getElementById('error-message');
-    errorDiv.classList.add('hidden');
-}
-
-// Configuration from PHP
-const dashboardConfig = {
-    recentDataLimit: <?= $config['recent_data_limit'] ?? 5 ?>,
-    tabDataLimit: <?= $config['tab_data_limit'] ?? 10 ?>,
-    stats: <?= json_encode($stats) ?>
-};
-
-function updateTableContent(data, type) {
-    const tableBody = document.getElementById('table-body');
-    const dataInfo = document.getElementById('data-info');
-    let rowsHTML = '';
-    
-    if (data && data.length > 0) {
-        data.forEach(item => {
-            rowsHTML += generateTableRow(item, type);
-        });
-        
-        // Update data info
-        updateDataInfo(data.length, type);
-    } else {
-        // Determine colspan based on type
-        let colspan = 2; // Default for mahasiswa, dosen, ruangan
-        if (type === 'jadwal') {
-            colspan = 4; // Jadwal has 4 columns
+            default:
+                return '';
         }
-        
-        rowsHTML = `
+    }
+
+    function getProdiName(nim) {
+        if (!nim) return 'N/A';
+
+        const nimPrefix = nim.toString().substring(0, 2);
+
+        switch (nimPrefix) {
+            case '11':
+                return 'Teknik Informatika';
+            case '12':
+                return 'Sistem Informasi';
+            case '13':
+                return 'Teknik Komputer';
+            default:
+                return 'Program Studi';
+        }
+    }
+
+    function showLoading(show) {
+        const loading = document.getElementById('table-loading');
+        const tableContainer = document.getElementById('table-container');
+
+        if (show) {
+            loading.classList.remove('hidden');
+            tableContainer.classList.add('hidden');
+        } else {
+            loading.classList.add('hidden');
+            tableContainer.classList.remove('hidden');
+        }
+    }
+
+    function showError(message) {
+        const errorDiv = document.getElementById('error-message');
+        const tableContainer = document.getElementById('table-container');
+
+        errorDiv.querySelector('p:last-child').textContent = message || 'Silakan refresh halaman atau coba lagi nanti';
+        errorDiv.classList.remove('hidden');
+        tableContainer.classList.add('hidden');
+    }
+
+    function hideError() {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.classList.add('hidden');
+    }
+
+    // Configuration from PHP
+    const dashboardConfig = {
+        recentDataLimit: <?= $config['recent_data_limit'] ?? 5 ?>,
+        tabDataLimit: <?= $config['tab_data_limit'] ?? 10 ?>,
+        stats: <?= json_encode($stats) ?>
+    };
+
+    function updateTableContent(data, type) {
+        const tableBody = document.getElementById('table-body');
+        const dataInfo = document.getElementById('data-info');
+        let rowsHTML = '';
+
+        if (data && data.length > 0) {
+            data.forEach(item => {
+                rowsHTML += generateTableRow(item, type);
+            });
+
+            // Update data info
+            updateDataInfo(data.length, type);
+        } else {
+            // Determine colspan based on type
+            let colspan = 2; // Default for mahasiswa, dosen, ruangan
+            if (type === 'jadwal') {
+                colspan = 4; // Jadwal has 4 columns
+            }
+
+            rowsHTML = `
             <tr>
                 <td colspan="${colspan}" class="px-6 py-4 text-center text-gray-500">
                     Tidak ada data ${type}
                 </td>
             </tr>
         `;
-        
-        // Update data info for empty state
-        updateDataInfo(0, type);
-    }
-    
-    tableBody.innerHTML = rowsHTML;
-}
 
-function updateDataInfo(count, type) {
-    const dataCount = document.getElementById('data-count');
-    const totalData = dashboardConfig.stats[type] || 0;
-    
-    let typeLabel = '';
-    switch(type) {
-        case 'mahasiswa':
-            typeLabel = 'mahasiswa';
-            break;
-        case 'dosen':
-            typeLabel = 'dosen';
-            break;
-        case 'ruangan':
-            typeLabel = 'ruangan';
-            break;
-        case 'jadwal':
-            typeLabel = 'jadwal';
-            break;
-    }
-    
-    if (count > 0) {
-        dataCount.textContent = `Menampilkan ${count} dari ${totalData} total ${typeLabel}`;
-    } else {
-        dataCount.textContent = `Tidak ada data ${typeLabel} untuk ditampilkan`;
-    }
-}
+            // Update data info for empty state
+            updateDataInfo(0, type);
+        }
 
-function refreshDashboard() {
-    // Show loading state
-    const refreshBtn = event.target.closest('a');
-    const originalText = refreshBtn.innerHTML;
-    
-    refreshBtn.innerHTML = `
+        tableBody.innerHTML = rowsHTML;
+    }
+
+    function updateDataInfo(count, type) {
+        const dataCount = document.getElementById('data-count');
+        const totalData = dashboardConfig.stats[type] || 0;
+
+        let typeLabel = '';
+        switch (type) {
+            case 'mahasiswa':
+                typeLabel = 'mahasiswa';
+                break;
+            case 'dosen':
+                typeLabel = 'dosen';
+                break;
+            case 'ruangan':
+                typeLabel = 'ruangan';
+                break;
+            case 'jadwal':
+                typeLabel = 'jadwal';
+                break;
+        }
+
+        if (count > 0) {
+            dataCount.textContent = `Menampilkan ${count} dari ${totalData} total ${typeLabel}`;
+        } else {
+            dataCount.textContent = `Tidak ada data ${typeLabel} untuk ditampilkan`;
+        }
+    }
+
+    function refreshDashboard() {
+        // Show loading state
+        const refreshBtn = event.target.closest('a');
+        const originalText = refreshBtn.innerHTML;
+
+        refreshBtn.innerHTML = `
         <svg class="w-4 h-4 inline mr-1 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
         </svg>
         Refreshing...
     `;
-    
-    // Reload page after short delay
-    setTimeout(() => {
-        location.reload();
-    }, 500);
-}
 
-function showAllData() {
-    // Get current active tab
-    const activeTab = document.querySelector('.tab-button.border-blue-800');
-    const tabType = activeTab ? activeTab.getAttribute('data-tab') : 'mahasiswa';
-    
-    // Redirect to appropriate page
-    switch(tabType) {
-        case 'mahasiswa':
-            window.location.href = baseUrl + '/admin/mahasiswa';
-            break;
-        case 'dosen':
-            window.location.href = baseUrl + '/admin/dosen';
-            break;
-        case 'ruangan':
-            window.location.href = baseUrl + '/admin/ruangan';
-            break;
-        case 'jadwal':
-            window.location.href = baseUrl + '/admin/jadwal';
-            break;
+        // Reload page after short delay
+        setTimeout(() => {
+            location.reload();
+        }, 500);
     }
-}
 
-// Modal functions
-function showSearchModal() {
-    const modal = document.getElementById('searchModal');
-    const modalContent = document.getElementById('searchModalContent');
-    
-    // Reset form
-    document.getElementById('searchQuery').value = '';
-    document.getElementById('searchResults').classList.add('hidden');
-    
-    // Ensure modal is appended to body root (not inside any container)
-    if (modal.parentNode !== document.body) {
-        document.body.appendChild(modal);
+    function showAllData() {
+        // Get current active tab
+        const activeTab = document.querySelector('.tab-button.border-blue-800');
+        const tabType = activeTab ? activeTab.getAttribute('data-tab') : 'mahasiswa';
+
+        // Redirect to appropriate page
+        switch (tabType) {
+            case 'mahasiswa':
+                window.location.href = baseUrl + '/admin/mahasiswa';
+                break;
+            case 'dosen':
+                window.location.href = baseUrl + '/admin/dosen';
+                break;
+            case 'ruangan':
+                window.location.href = baseUrl + '/admin/ruangan';
+                break;
+            case 'jadwal':
+                window.location.href = baseUrl + '/admin/jadwal';
+                break;
+        }
     }
-    
-    // Lock body scroll and add modal class
-    document.body.classList.add('modal-open');
-    document.body.style.overflow = 'hidden';
-    
-    // Force highest z-index and positioning
-    modal.style.cssText = `
+
+    // Modal functions
+    function showSearchModal() {
+        const modal = document.getElementById('searchModal');
+        const modalContent = document.getElementById('searchModalContent');
+
+        // Reset form
+        document.getElementById('searchQuery').value = '';
+        document.getElementById('searchResults').classList.add('hidden');
+
+        // Ensure modal is appended to body root (not inside any container)
+        if (modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        // Lock body scroll and add modal class
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+
+        // Force highest z-index and positioning
+        modal.style.cssText = `
         z-index: 2147483647 !important;
         position: fixed !important;
         top: 0 !important;
@@ -891,73 +891,73 @@ function showSearchModal() {
         justify-content: center !important;
         background-color: rgba(0, 0, 0, 0.5) !important;
     `;
-    
-    modalContent.style.cssText = `
+
+        modalContent.style.cssText = `
         z-index: 2147483648 !important;
         position: relative !important;
     `;
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Animate modal
-    setTimeout(() => {
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
-    }, 10);
-    
-    // Focus on search input
-    setTimeout(() => {
-        document.getElementById('searchQuery').focus();
-    }, 100);
-}
 
-function closeSearchModal() {
-    const modal = document.getElementById('searchModal');
-    const modalContent = document.getElementById('searchModalContent');
-    
-    // Animate out
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    modalContent.classList.add('scale-95', 'opacity-0');
-    
-    // Hide modal after animation and remove all effects
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        
-        // Completely clear all inline styles from modal
-        modal.removeAttribute('style');
-        modalContent.removeAttribute('style');
-        
-        // Remove body effects
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.filter = '';
-        
-        // Ensure modal is properly hidden
-        modal.style.display = 'none';
-        
-        // Force a small delay then reset display
+        // Show modal
+        modal.classList.remove('hidden');
+
+        // Animate modal
         setTimeout(() => {
-            modal.style.display = '';
-        }, 50);
-    }, 300);
-}
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
 
-function performSearch() {
-    const searchType = document.getElementById('searchType').value;
-    const searchQuery = document.getElementById('searchQuery').value.trim();
-    
-    if (!searchQuery) {
-        showWarning('Masukkan kata kunci pencarian');
-        return;
+        // Focus on search input
+        setTimeout(() => {
+            document.getElementById('searchQuery').focus();
+        }, 100);
     }
-    
-    // Show loading
-    const resultsDiv = document.getElementById('searchResults');
-    const resultsContent = document.getElementById('searchResultsContent');
-    
-    resultsDiv.classList.remove('hidden');
-    resultsContent.innerHTML = `
+
+    function closeSearchModal() {
+        const modal = document.getElementById('searchModal');
+        const modalContent = document.getElementById('searchModalContent');
+
+        // Animate out
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+
+        // Hide modal after animation and remove all effects
+        setTimeout(() => {
+            modal.classList.add('hidden');
+
+            // Completely clear all inline styles from modal
+            modal.removeAttribute('style');
+            modalContent.removeAttribute('style');
+
+            // Remove body effects
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.filter = '';
+
+            // Ensure modal is properly hidden
+            modal.style.display = 'none';
+
+            // Force a small delay then reset display
+            setTimeout(() => {
+                modal.style.display = '';
+            }, 50);
+        }, 300);
+    }
+
+    function performSearch() {
+        const searchType = document.getElementById('searchType').value;
+        const searchQuery = document.getElementById('searchQuery').value.trim();
+
+        if (!searchQuery) {
+            showWarning('Masukkan kata kunci pencarian');
+            return;
+        }
+
+        // Show loading
+        const resultsDiv = document.getElementById('searchResults');
+        const resultsContent = document.getElementById('searchResultsContent');
+
+        resultsDiv.classList.remove('hidden');
+        resultsContent.innerHTML = `
         <div class="p-4 text-center">
             <svg class="animate-spin w-6 h-6 mx-auto text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
@@ -966,150 +966,150 @@ function performSearch() {
             <p class="mt-2 text-sm text-gray-600">Mencari...</p>
         </div>
     `;
-    
-    // Perform search via AJAX
-    fetch(`${baseUrl}/admin/dashboard/search`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-Requested-With': 'XMLHttpRequest'
-        },
-        body: JSON.stringify({
-            type: searchType,
-            query: searchQuery
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success && data.results) {
-            displaySearchResults(data.results, searchType);
-        } else {
-            resultsContent.innerHTML = `
+
+        // Perform search via AJAX
+        fetch(`${baseUrl}/admin/dashboard/search`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: JSON.stringify({
+                    type: searchType,
+                    query: searchQuery
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success && data.results) {
+                    displaySearchResults(data.results, searchType);
+                } else {
+                    resultsContent.innerHTML = `
                 <div class="p-4 text-center text-gray-500">
                     <p>Tidak ada hasil ditemukan</p>
                 </div>
             `;
-        }
-    })
-    .catch(error => {
-        console.error('Search error:', error);
-        resultsContent.innerHTML = `
+                }
+            })
+            .catch(error => {
+                console.error('Search error:', error);
+                resultsContent.innerHTML = `
             <div class="p-4 text-center text-red-500">
                 <p>Terjadi kesalahan saat mencari</p>
             </div>
         `;
-    });
-}
+            });
+    }
 
-function displaySearchResults(results, type) {
-    const resultsContent = document.getElementById('searchResultsContent');
-    let html = '';
-    
-    results.forEach(item => {
-        let displayText = '';
-        let clickAction = '';
-        
-        switch(type) {
-            case 'mahasiswa':
-                displayText = `${item.nim} - ${item.nama}`;
-                clickAction = `onclick="goToPage('admin/mahasiswa')"`;
-                break;
-            case 'dosen':
-                displayText = `${item.nidn} - ${item.nama}`;
-                clickAction = `onclick="goToPage('admin/dosen')"`;
-                break;
-            case 'ruangan':
-                displayText = item.nama_ruangan;
-                clickAction = `onclick="goToPage('admin/ruangan')"`;
-                break;
-            case 'jadwal':
-                displayText = `${item.nama_kelas} - ${item.nama_mata_kuliah || 'N/A'}`;
-                clickAction = `onclick="goToPage('admin/jadwal')"`;
-                break;
-        }
-        
-        html += `
+    function displaySearchResults(results, type) {
+        const resultsContent = document.getElementById('searchResultsContent');
+        let html = '';
+
+        results.forEach(item => {
+            let displayText = '';
+            let clickAction = '';
+
+            switch (type) {
+                case 'mahasiswa':
+                    displayText = `${item.nim} - ${item.nama}`;
+                    clickAction = `onclick="goToPage('admin/mahasiswa')"`;
+                    break;
+                case 'dosen':
+                    displayText = `${item.nidn} - ${item.nama}`;
+                    clickAction = `onclick="goToPage('admin/dosen')"`;
+                    break;
+                case 'ruangan':
+                    displayText = item.nama_ruangan;
+                    clickAction = `onclick="goToPage('admin/ruangan')"`;
+                    break;
+                case 'jadwal':
+                    displayText = `${item.nama_kelas} - ${item.nama_mata_kuliah || 'N/A'}`;
+                    clickAction = `onclick="goToPage('admin/jadwal')"`;
+                    break;
+            }
+
+            html += `
             <div class="p-3 border-b border-gray-100 hover:bg-gray-50 cursor-pointer" ${clickAction}>
                 <p class="text-sm font-medium text-gray-900">${displayText}</p>
             </div>
         `;
-    });
-    
-    if (html) {
-        resultsContent.innerHTML = html;
-    } else {
-        resultsContent.innerHTML = `
+        });
+
+        if (html) {
+            resultsContent.innerHTML = html;
+        } else {
+            resultsContent.innerHTML = `
             <div class="p-4 text-center text-gray-500">
                 <p>Tidak ada hasil ditemukan</p>
             </div>
         `;
-    }
-}
-
-function goToPage(page) {
-    closeSearchModal();
-    setTimeout(() => {
-        window.location.href = baseUrl + '/' + page;
-    }, 300);
-}
-
-// Export function - commented out for now
-/*
-function exportData() {
-    const options = [
-        { value: 'mahasiswa', label: 'Data Mahasiswa' },
-        { value: 'dosen', label: 'Data Dosen' },
-        { value: 'ruangan', label: 'Data Ruangan' },
-        { value: 'jadwal', label: 'Data Jadwal' }
-    ];
-    
-    let optionsHtml = options.map(opt => 
-        `<option value="${opt.value}">${opt.label}</option>`
-    ).join('');
-    
-    const result = prompt(`Pilih data yang akan di-export:\n\n${options.map((opt, i) => `${i+1}. ${opt.label}`).join('\n')}\n\nMasukkan nomor (1-4):`);
-    
-    if (result) {
-        const index = parseInt(result) - 1;
-        if (index >= 0 && index < options.length) {
-            const selectedType = options[index].value;
-            
-            // Create download link
-            const downloadUrl = `${baseUrl}/admin/dashboard/export/${selectedType}`;
-            
-            // Show loading message
-            alert(`Memproses export ${options[index].label}...`);
-            
-            // Create temporary link and trigger download
-            const link = document.createElement('a');
-            link.href = downloadUrl;
-            link.download = `${selectedType}_${new Date().toISOString().split('T')[0]}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            alert('Pilihan tidak valid');
         }
     }
-}
-*/
 
-// Statistics Modal Functions
-function showStatsModal() {
-    const modal = document.getElementById('statsModal');
-    const modalContent = document.getElementById('statsModalContent');
-    
-    // Ensure modal is appended to body root (not inside any container)
-    if (modal.parentNode !== document.body) {
-        document.body.appendChild(modal);
+    function goToPage(page) {
+        closeSearchModal();
+        setTimeout(() => {
+            window.location.href = baseUrl + '/' + page;
+        }, 300);
     }
-    
-    // Lock body scroll and add modal class
-    document.body.classList.add('modal-open');
-    document.body.style.overflow = 'hidden';
-    
-    // Force highest z-index and positioning
-    modal.style.cssText = `
+
+    // Export function - commented out for now
+    /*
+    function exportData() {
+        const options = [
+            { value: 'mahasiswa', label: 'Data Mahasiswa' },
+            { value: 'dosen', label: 'Data Dosen' },
+            { value: 'ruangan', label: 'Data Ruangan' },
+            { value: 'jadwal', label: 'Data Jadwal' }
+        ];
+        
+        let optionsHtml = options.map(opt => 
+            `<option value="${opt.value}">${opt.label}</option>`
+        ).join('');
+        
+        const result = prompt(`Pilih data yang akan di-export:\n\n${options.map((opt, i) => `${i+1}. ${opt.label}`).join('\n')}\n\nMasukkan nomor (1-4):`);
+        
+        if (result) {
+            const index = parseInt(result) - 1;
+            if (index >= 0 && index < options.length) {
+                const selectedType = options[index].value;
+                
+                // Create download link
+                const downloadUrl = `${baseUrl}/admin/dashboard/export/${selectedType}`;
+                
+                // Show loading message
+                alert(`Memproses export ${options[index].label}...`);
+                
+                // Create temporary link and trigger download
+                const link = document.createElement('a');
+                link.href = downloadUrl;
+                link.download = `${selectedType}_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                alert('Pilihan tidak valid');
+            }
+        }
+    }
+    */
+
+    // Statistics Modal Functions
+    function showStatsModal() {
+        const modal = document.getElementById('statsModal');
+        const modalContent = document.getElementById('statsModalContent');
+
+        // Ensure modal is appended to body root (not inside any container)
+        if (modal.parentNode !== document.body) {
+            document.body.appendChild(modal);
+        }
+
+        // Lock body scroll and add modal class
+        document.body.classList.add('modal-open');
+        document.body.style.overflow = 'hidden';
+
+        // Force highest z-index and positioning
+        modal.style.cssText = `
         z-index: 2147483647 !important;
         position: fixed !important;
         top: 0 !important;
@@ -1123,159 +1123,159 @@ function showStatsModal() {
         justify-content: center !important;
         background-color: rgba(0, 0, 0, 0.5) !important;
     `;
-    
-    modalContent.style.cssText = `
+
+        modalContent.style.cssText = `
         z-index: 2147483648 !important;
         position: relative !important;
     `;
-    
-    // Show modal
-    modal.classList.remove('hidden');
-    
-    // Animate modal
-    setTimeout(() => {
-        modalContent.classList.remove('scale-95', 'opacity-0');
-        modalContent.classList.add('scale-100', 'opacity-100');
-    }, 10);
-    
-    // Load detailed statistics
-    loadDetailedStats();
-}
 
-function closeStatsModal() {
-    const modal = document.getElementById('statsModal');
-    const modalContent = document.getElementById('statsModalContent');
-    
-    // Animate out
-    modalContent.classList.remove('scale-100', 'opacity-100');
-    modalContent.classList.add('scale-95', 'opacity-0');
-    
-    // Hide modal after animation and remove all effects
-    setTimeout(() => {
-        modal.classList.add('hidden');
-        
-        // Completely clear all inline styles from modal
-        modal.removeAttribute('style');
-        modalContent.removeAttribute('style');
-        
-        // Remove body effects
-        document.body.classList.remove('modal-open');
-        document.body.style.overflow = '';
-        document.body.style.filter = '';
-        
-        // Ensure modal is properly hidden
-        modal.style.display = 'none';
-        
-        // Force a small delay then reset display
+        // Show modal
+        modal.classList.remove('hidden');
+
+        // Animate modal
         setTimeout(() => {
-            modal.style.display = '';
-        }, 50);
-    }, 300);
-}
+            modalContent.classList.remove('scale-95', 'opacity-0');
+            modalContent.classList.add('scale-100', 'opacity-100');
+        }, 10);
 
-function loadDetailedStats() {
-    // Show loading
-    document.getElementById('stats-loading').classList.remove('hidden');
-    
-    // Fetch detailed statistics
-    fetch(`${baseUrl}/admin/dashboard/getDetailedStats`, {
-        method: 'GET',
-        headers: {
-            'X-Requested-With': 'XMLHttpRequest'
-        }
-    })
-    .then(response => response.json())
-    .then(data => {
-        document.getElementById('stats-loading').classList.add('hidden');
-        
-        if (data.success) {
-            updateStatsDisplay(data.stats);
-        } else {
-            console.error('Failed to load detailed stats');
-        }
-    })
-    .catch(error => {
-        console.error('Error loading stats:', error);
-        document.getElementById('stats-loading').classList.add('hidden');
-    });
-}
-
-function updateStatsDisplay(stats) {
-    // Update mahasiswa stats
-    document.getElementById('stats-mahasiswa-aktif').textContent = stats.mahasiswa_aktif || '-';
-    document.getElementById('stats-mahasiswa-recent').textContent = stats.mahasiswa_recent || '-';
-    
-    // Update dosen stats
-    document.getElementById('stats-dosen-aktif').textContent = stats.dosen_aktif || '-';
-    document.getElementById('stats-dosen-recent').textContent = stats.dosen_recent || '-';
-    
-    // Update ruangan stats
-    document.getElementById('stats-ruangan-lab').textContent = stats.ruangan_lab || '-';
-    document.getElementById('stats-ruangan-kelas').textContent = stats.ruangan_kelas || '-';
-    
-    // Update jadwal stats
-    document.getElementById('stats-jadwal-today').textContent = stats.jadwal_today || '-';
-    document.getElementById('stats-jadwal-week').textContent = stats.jadwal_week || '-';
-    
-    // Update activity stats
-    document.getElementById('stats-activity-today').textContent = stats.activity_today || '-';
-    document.getElementById('stats-activity-week').textContent = stats.activity_week || '-';
-    document.getElementById('stats-activity-month').textContent = stats.activity_month || '-';
-}
-
-function refreshStats() {
-    loadDetailedStats();
-}
-
-// // Test toast function (temporary)
-// function testToast() {
-//     showSuccess('Toast berhasil ditampilkan!');
-//     setTimeout(() => showError('Ini adalah error toast'), 1000);
-//     setTimeout(() => showWarning('Ini adalah warning toast'), 2000);
-//     setTimeout(() => showInfo('Ini adalah info toast'), 3000);
-// }
-
-// Close modal when clicking backdrop
-document.addEventListener('click', function(e) {
-    const searchModal = document.getElementById('searchModal');
-    const statsModal = document.getElementById('statsModal');
-    
-    if (e.target === searchModal) {
-        closeSearchModal();
+        // Load detailed statistics
+        loadDetailedStats();
     }
-    
-    if (e.target === statsModal) {
-        closeStatsModal();
-    }
-});
 
-// Close modal with Escape key
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape') {
+    function closeStatsModal() {
+        const modal = document.getElementById('statsModal');
+        const modalContent = document.getElementById('statsModalContent');
+
+        // Animate out
+        modalContent.classList.remove('scale-100', 'opacity-100');
+        modalContent.classList.add('scale-95', 'opacity-0');
+
+        // Hide modal after animation and remove all effects
+        setTimeout(() => {
+            modal.classList.add('hidden');
+
+            // Completely clear all inline styles from modal
+            modal.removeAttribute('style');
+            modalContent.removeAttribute('style');
+
+            // Remove body effects
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.filter = '';
+
+            // Ensure modal is properly hidden
+            modal.style.display = 'none';
+
+            // Force a small delay then reset display
+            setTimeout(() => {
+                modal.style.display = '';
+            }, 50);
+        }, 300);
+    }
+
+    function loadDetailedStats() {
+        // Show loading
+        document.getElementById('stats-loading').classList.remove('hidden');
+
+        // Fetch detailed statistics
+        fetch(`${baseUrl}/admin/dashboard/getDetailedStats`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('stats-loading').classList.add('hidden');
+
+                if (data.success) {
+                    updateStatsDisplay(data.stats);
+                } else {
+                    console.error('Failed to load detailed stats');
+                }
+            })
+            .catch(error => {
+                console.error('Error loading stats:', error);
+                document.getElementById('stats-loading').classList.add('hidden');
+            });
+    }
+
+    function updateStatsDisplay(stats) {
+        // Update mahasiswa stats
+        document.getElementById('stats-mahasiswa-aktif').textContent = stats.mahasiswa_aktif || '-';
+        document.getElementById('stats-mahasiswa-recent').textContent = stats.mahasiswa_recent || '-';
+
+        // Update dosen stats
+        document.getElementById('stats-dosen-aktif').textContent = stats.dosen_aktif || '-';
+        document.getElementById('stats-dosen-recent').textContent = stats.dosen_recent || '-';
+
+        // Update ruangan stats
+        document.getElementById('stats-ruangan-lab').textContent = stats.ruangan_lab || '-';
+        document.getElementById('stats-ruangan-kelas').textContent = stats.ruangan_kelas || '-';
+
+        // Update jadwal stats
+        document.getElementById('stats-jadwal-today').textContent = stats.jadwal_today || '-';
+        document.getElementById('stats-jadwal-week').textContent = stats.jadwal_week || '-';
+
+        // Update activity stats
+        document.getElementById('stats-activity-today').textContent = stats.activity_today || '-';
+        document.getElementById('stats-activity-week').textContent = stats.activity_week || '-';
+        document.getElementById('stats-activity-month').textContent = stats.activity_month || '-';
+    }
+
+    function refreshStats() {
+        loadDetailedStats();
+    }
+
+    // // Test toast function (temporary)
+    // function testToast() {
+    //     showSuccess('Toast berhasil ditampilkan!');
+    //     setTimeout(() => showError('Ini adalah error toast'), 1000);
+    //     setTimeout(() => showWarning('Ini adalah warning toast'), 2000);
+    //     setTimeout(() => showInfo('Ini adalah info toast'), 3000);
+    // }
+
+    // Close modal when clicking backdrop
+    document.addEventListener('click', function(e) {
         const searchModal = document.getElementById('searchModal');
         const statsModal = document.getElementById('statsModal');
-        
-        if (!searchModal.classList.contains('hidden')) {
+
+        if (e.target === searchModal) {
             closeSearchModal();
-        } else if (!statsModal.classList.contains('hidden')) {
+        }
+
+        if (e.target === statsModal) {
             closeStatsModal();
         }
-    }
-});
+    });
 
-// Enter key to search
-document.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') {
-        const searchQuery = document.getElementById('searchQuery');
-        if (document.activeElement === searchQuery) {
-            performSearch();
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            const searchModal = document.getElementById('searchModal');
+            const statsModal = document.getElementById('statsModal');
+
+            if (!searchModal.classList.contains('hidden')) {
+                closeSearchModal();
+            } else if (!statsModal.classList.contains('hidden')) {
+                closeStatsModal();
+            }
         }
-    }
-});
+    });
 
-// Auto refresh stats every 5 minutes
-setInterval(function() {
-    location.reload();
-}, 5 * 60 * 1000);
+    // Enter key to search
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            const searchQuery = document.getElementById('searchQuery');
+            if (document.activeElement === searchQuery) {
+                performSearch();
+            }
+        }
+    });
+
+    // Auto refresh stats every 5 minutes
+    setInterval(function() {
+        location.reload();
+    }, 5 * 60 * 1000);
 </script>
 <?= $this->endSection() ?>

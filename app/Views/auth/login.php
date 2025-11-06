@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="<?= base_url('assets/css/main.css') ?>">
 </head>
 
-<body class="bg-blue-600 min-h-screen flex items-center justify-center">
+<body class="bg-blue-700 min-h-screen flex items-center justify-center">
     <div class="max-w-md w-full mx-4">
         <!-- Login Card -->
         <div class="bg-white rounded-lg shadow-lg p-8">
@@ -30,7 +30,7 @@
                 <!-- Kode Field -->
                 <div>
                     <label for="kode" class="block text-sm font-medium text-gray-700 mb-2">
-                        Username (NIM/NIDN)
+                       ID 
                     </label>
                     <input type="text" id="kode" name="kode" required class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-800 focus:border-transparent transition duration-200 ease-in-out" placeholder="Masukkan NIM/NIDN/Username" autocomplete="off" value="<?= old('kode') ?>">
                 </div>
@@ -97,7 +97,7 @@
         <!-- Additional Info -->
         <div class="mt-6 text-center">
             <p class="text-xs text-black">
-                © <?= date('Y'); ?> SIPAKU. Sistem Informasi Perkuliahan Universitas.
+                © <?= date('Y'); ?> SIPAKU. Sistem Informasi Perkuliahan Akademik.
             </p>
         </div>
     </div>

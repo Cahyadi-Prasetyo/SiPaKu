@@ -8,34 +8,14 @@ class AddUserRelations extends Migration
 {
     public function up()
     {
-        // Menambahkan kolom untuk relasi user dengan mahasiswa/dosen
-        $this->forge->addColumn('user', [
-            'nim' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '20',
-                'null'       => true,
-                'after'      => 'kode'
-            ],
-            'nidn' => [
-                'type'       => 'VARCHAR',
-                'constraint' => '20',
-                'null'       => true,
-                'after'      => 'nim'
-            ]
-        ]);
-        
-        // Menambahkan foreign key constraints
-        $this->forge->addForeignKey('nim', 'mahasiswa', 'nim', 'SET NULL', 'CASCADE', 'user');
-        $this->forge->addForeignKey('nidn', 'dosen', 'nidn', 'SET NULL', 'CASCADE', 'user');
+        // Migration ini tidak diperlukan karena struktur final user table
+        // tidak menggunakan relasi langsung ke mahasiswa/dosen
+        // User table hanya menggunakan field 'kode' untuk identifikasi
+        // Dibiarkan kosong untuk menghindari konflik dengan migration selanjutnya
     }
 
     public function down()
     {
-        // Menghapus foreign key constraints
-        $this->forge->dropForeignKey('user', 'user_nim_foreign');
-        $this->forge->dropForeignKey('user', 'user_nidn_foreign');
-        
-        // Menghapus kolom
-        $this->forge->dropColumn('user', ['nim', 'nidn']);
+        // Tidak ada yang perlu di-rollback
     }
 }

@@ -218,7 +218,7 @@ class JadwalModel extends Model
      */
     public function insert($data = null, bool $returnID = true)
     {
-        if ($data) {
+        if ($data) { 
             $conflicts = $this->validateScheduleConflict($data);
             if (!empty($conflicts)) {
                 // Ensure $this->errors is an array before merging
@@ -235,6 +235,7 @@ class JadwalModel extends Model
      */
     public function update($id = null, $data = null): bool
     {
+        
         if ($data) {
             $conflicts = $this->validateScheduleConflict($data, $id);
             if (!empty($conflicts)) {

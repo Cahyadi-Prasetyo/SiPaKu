@@ -4,16 +4,27 @@
         <div class="flex flex-col sm:flex-row justify-between items-center space-y-2 sm:space-y-0">
             <div class="flex items-center">
                 <p class="text-sm text-gray-500">
-                    © <?= date('Y') ?> SIPAKU. Sistem Informasi Akademik Universitas.
+                    © <?= date('Y') ?> SIPAKU. Portal Dosen - Sistem Informasi Akademik.
                 </p>
             </div>
             <div class="flex items-center space-x-4">
                 <span class="text-xs text-gray-400">Version 1.0.0</span>
                 <span class="text-xs text-gray-400 hidden sm:inline">|</span>
-                <a href="#" class="text-xs text-blue-600 hover:text-blue-800">Bantuan</a>
+                <a href="#" onclick="showDevelopmentToast('Bantuan'); return false;" class="text-xs text-green-600 hover:text-green-800">Bantuan</a>
                 <span class="text-xs text-gray-400 hidden sm:inline">|</span>
-                <a href="#" class="text-xs text-blue-600 hover:text-blue-800">Kontak</a>
+                <a href="#" onclick="showDevelopmentToast('Kontak'); return false;" class="text-xs text-green-600 hover:text-green-800">Kontak</a>
             </div>
         </div>
+        
     </div>
 </footer>
+
+<script>
+    // Development toast function
+    function showDevelopmentToast(featureName) {
+        const message = `🚧 ${featureName} sedang dalam tahap pengembangan dan akan segera tersedia!`;
+        if (window.toast) {
+            window.toast.info(message, 4000);
+        }
+    }
+</script>

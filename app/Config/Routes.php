@@ -4,90 +4,135 @@ use CodeIgniter\Router\RouteCollection;
 
 /**
  * @var RouteCollection $routes
+ * 
+ * SIPAKU - Sistem Informasi Akademik
+ * Route Configuration
  */
-
-// Public routes
 $routes->get('/', 'Auth\Login::index');
 
-// Auth routes (untuk guest)
+// Guest routes (untuk user yang belum login)
 $routes->group('', ['filter' => 'guest'], function($routes) {
     $routes->get('login', 'Auth\Login::index');
     $routes->post('login', 'Auth\Login::authenticate');
 });
 
+// Authenticated user routes
+$routes->group('', ['filter' => 'auth'], function($routes) {
+    $routes->get('logout', 'Auth\Login::logout');
+    $routes->post('extend-session', 'Auth\Login::extendSession'); // AJAX session extension
+});
 
-// Logout route (untuk authenticated user)
-$routes->get('logout', 'Auth\Login::logout', ['filter' => 'auth']);
 
-// Extend session route (AJAX)
-$routes->post('extend-session', 'Auth\Login::extendSession', ['filter' => 'auth']);
-
-// Admin routes (dengan auth filter)
 $routes->group('admin', ['filter' => 'auth:admin'], function($routes) {
+    
+    // Dashboard
     $routes->get('dashboard', 'Admin\Dashboard::index');
+    $routes->get('dashboard/getTabData/(:segment)', 'Admin\Dashboard::getTabData/$1');
+    $routes->post('dashboard/updateConfig', 'Admin\Dashboard::updateConfig');
+    $routes->get('dashboard/getConfig', 'Admin\Dashboard::getConfig');
+    $routes->post('dashboard/search', 'Admin\Dashboard::search');
+    $routes->get('dashboard/getDetailedStats', 'Admin\Dashboard::getDetailedStats');
+    // $routes->get('dashboard/export/(:segment)', 'Admin\Dashboard::export/$1'); // Future feature
+    
+    // Mahasiswa Management
+    $routes->group('mahasiswa', function($routes) {
+        $routes->get('/', 'Admin\Mahasiswa::index');
+        $routes->post('/', 'Admin\Mahasiswa::create');
+        $routes->get('(:segment)', 'Admin\Mahasiswa::show/$1');
+        $routes->post('update/(:segment)', 'Admin\Mahasiswa::update/$1');
+        $routes->delete('(:segment)', 'Admin\Mahasiswa::delete/$1');
+    });
+    
+    // Dosen Management
+    $routes->group('dosen', function($routes) {
+        $routes->get('/', 'Admin\Dosen::index');
+        $routes->post('/', 'Admin\Dosen::create');
+        $routes->get('(:segment)', 'Admin\Dosen::show/$1');
+        $routes->post('update/(:segment)', 'Admin\Dosen::update/$1');
+        $routes->delete('(:segment)', 'Admin\Dosen::delete/$1');
+    });
+    
+    // Mata Kuliah Management
+    $routes->group('mata-kuliah', function($routes) {
+        $routes->get('/', 'Admin\MataKuliah::index');
+        $routes->post('/', 'Admin\MataKuliah::create');
+        $routes->get('(:segment)', 'Admin\MataKuliah::show/$1');
+        $routes->post('update/(:segment)', 'Admin\MataKuliah::update/$1');
+        $routes->delete('(:segment)', 'Admin\MataKuliah::delete/$1');
+    });
+    
+    // Ruangan Management
+    $routes->group('ruangan', function($routes) {
+        $routes->get('/', 'Admin\Ruangan::index');
+        $routes->post('/', 'Admin\Ruangan::create');
+        $routes->get('(:segment)', 'Admin\Ruangan::show/$1');
+        $routes->post('update/(:segment)', 'Admin\Ruangan::update/$1');
+        $routes->delete('(:segment)', 'Admin\Ruangan::delete/$1');
+    });
+    
+    // Jadwal Management
+    $routes->group('jadwal', function($routes) {
+        $routes->get('/', 'Admin\Jadwal::index');
+        $routes->post('/', 'Admin\Jadwal::create');
+        $routes->get('(:segment)', 'Admin\Jadwal::show/$1');
+        $routes->post('update/(:segment)', 'Admin\Jadwal::update/$1');
+        $routes->delete('(:segment)', 'Admin\Jadwal::delete/$1');
+        
+        // AJAX endpoints for jadwal
+        $routes->get('getMataKuliah', 'Admin\Jadwal::getMataKuliah');
+        $routes->get('getDosen', 'Admin\Jadwal::getDosen');
+        $routes->get('getRuangan', 'Admin\Jadwal::getRuangan');
+        $routes->post('checkConflict', 'Admin\Jadwal::checkConflict');
+    });
+    
+    // User Management & Bulk Operations
+    $routes->group('users', function($routes) {
+        // $routes->get('/', 'Admin\Users::index');                    // Future feature
+        // $routes->post('/', 'Admin\Users::create');                  // Future feature
+        // $routes->get('(:segment)', 'Admin\Users::show/$1');         // Future feature
+        // $routes->post('update/(:segment)', 'Admin\Users::update/$1'); // Future feature
+        // $routes->delete('(:segment)', 'Admin\Users::delete/$1');    // Future feature
+        
+        // Bulk operations
+        $routes->post('bulk-create-mahasiswa', 'Admin\Users::bulkCreateMahasiswa');
+        $routes->post('bulk-create-dosen', 'Admin\Users::bulkCreateDosen');
+        $routes->post('test-auto-generate', 'Admin\Users::testAutoGenerate');
+    });
+    
+    // Development/Testing routes
+    $routes->get('test-empty', function() {
+        return view('admin/test-empty', ['title' => 'Test Empty Page']);
+    });
 });
 
-// Dosen routes  
 $routes->group('dosen', ['filter' => 'auth:dosen'], function($routes) {
+    
+    // Dashboard
     $routes->get('dashboard', 'Dosen\DosenController::dashboard');
+    
+    // Jadwal Mengajar
+    $routes->get('jadwal', 'Dosen\DosenController::jadwal');
+    
+    // Input & Kelola Nilai
+    $routes->group('nilai', function($routes) {
+        $routes->get('/', 'Dosen\DosenController::nilai');
+        $routes->get('mahasiswa/(:segment)', 'Dosen\DosenController::getMahasiswaByJadwal/$1');
+        $routes->post('save', 'Dosen\DosenController::saveNilai');
+    });
+    
+    // Future features
+    // $routes->get('riwayat-mengajar', 'Dosen\DosenController::riwayatMengajar');
+    // $routes->get('laporan', 'Dosen\DosenController::laporan');
 });
 
-// Mahasiswa routes
 $routes->group('mahasiswa', ['filter' => 'auth:mahasiswa'], function($routes) {
+    
+    // Dashboard
     $routes->get('dashboard', 'Mahasiswa\MahasiswaController::dashboard');
-});
-$routes->get('admin/dashboard/getTabData/(:segment)', 'Admin\Dashboard::getTabData/$1');
-$routes->post('admin/dashboard/updateConfig', 'Admin\Dashboard::updateConfig');
-$routes->get('admin/dashboard/getConfig', 'Admin\Dashboard::getConfig');
-$routes->post('admin/dashboard/search', 'Admin\Dashboard::search');
-$routes->get('admin/dashboard/getDetailedStats', 'Admin\Dashboard::getDetailedStats');
-// $routes->get('admin/dashboard/export/(:segment)', 'Admin\Dashboard::export/$1'); // Commented out for now
-$routes->get('admin/mahasiswa', 'Admin\Mahasiswa::index');
-$routes->post('admin/mahasiswa', 'Admin\Mahasiswa::create');
-$routes->post('admin/mahasiswa/update/(:segment)', 'Admin\Mahasiswa::update/$1');
-$routes->get('admin/mahasiswa/(:segment)', 'Admin\Mahasiswa::show/$1');
-$routes->delete('admin/mahasiswa/(:segment)', 'Admin\Mahasiswa::delete/$1');
-
-$routes->get('admin/dosen', 'Admin\Dosen::index');
-$routes->post('admin/dosen', 'Admin\Dosen::create');
-$routes->post('admin/dosen/update/(:segment)', 'Admin\Dosen::update/$1');
-$routes->get('admin/dosen/(:segment)', 'Admin\Dosen::show/$1');
-$routes->delete('admin/dosen/(:segment)', 'Admin\Dosen::delete/$1');
-
-$routes->get('admin/ruangan', 'Admin\Ruangan::index');
-$routes->post('admin/ruangan', 'Admin\Ruangan::create');
-$routes->post('admin/ruangan/update/(:segment)', 'Admin\Ruangan::update/$1');
-$routes->get('admin/ruangan/(:segment)', 'Admin\Ruangan::show/$1');
-$routes->delete('admin/ruangan/(:segment)', 'Admin\Ruangan::delete/$1');
-
-$routes->get('admin/jadwal', 'Admin\Jadwal::index');
-$routes->post('admin/jadwal', 'Admin\Jadwal::create');
-$routes->get('admin/jadwal/getMataKuliah', 'Admin\Jadwal::getMataKuliah');
-$routes->get('admin/jadwal/getDosen', 'Admin\Jadwal::getDosen');
-$routes->get('admin/jadwal/getRuangan', 'Admin\Jadwal::getRuangan');
-$routes->post('admin/jadwal/checkConflict', 'Admin\Jadwal::checkConflict');
-$routes->post('admin/jadwal/update/(:segment)', 'Admin\Jadwal::update/$1');
-$routes->get('admin/jadwal/(:segment)', 'Admin\Jadwal::show/$1');
-$routes->delete('admin/jadwal/(:segment)', 'Admin\Jadwal::delete/$1');
-// Mata Kuliah routes
-$routes->get('admin/mata-kuliah', 'Admin\MataKuliah::index');
-$routes->post('admin/mata-kuliah', 'Admin\MataKuliah::create');
-$routes->post('admin/mata-kuliah/update/(:segment)', 'Admin\MataKuliah::update/$1');
-$routes->get('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::show/$1');
-$routes->delete('admin/mata-kuliah/(:segment)', 'Admin\MataKuliah::delete/$1');
-
-// // Users routes
-// $routes->get('admin/users', 'Admin\Users::index');
-// $routes->post('admin/users', 'Admin\Users::create');
-// $routes->post('admin/users/update/(:segment)', 'Admin\Users::update/$1');
-// $routes->get('admin/users/(:segment)', 'Admin\Users::show/$1');
-// $routes->delete('admin/users/(:segment)', 'Admin\Users::delete/$1');
-
-// Bulk operations routes
-$routes->post('admin/users/bulk-create-mahasiswa', 'Admin\Users::bulkCreateMahasiswa');
-$routes->post('admin/users/bulk-create-dosen', 'Admin\Users::bulkCreateDosen');
-$routes->post('admin/users/test-auto-generate', 'Admin\Users::testAutoGenerate');
-
-$routes->get('admin/test-empty', function() {
-    return view('admin/test-empty', ['title' => 'Test Empty Page']);
+    
+    // Future features
+    // $routes->get('jadwal', 'Mahasiswa\MahasiswaController::jadwal');
+    // $routes->get('nilai', 'Mahasiswa\MahasiswaController::nilai');
+    // $routes->get('transkrip', 'Mahasiswa\MahasiswaController::transkrip');
+    // $routes->get('krs', 'Mahasiswa\MahasiswaController::krs');
 });

@@ -46,12 +46,13 @@ class RencanaStudi extends Migration
         $this->forge->addKey('id_rencana_studi', true); // PK
         $this->forge->addForeignKey('nim', 'mahasiswa', 'nim', 'CASCADE', 'CASCADE'); // FK
         $this->forge->addForeignKey('id_jadwal', 'jadwal', 'id', 'CASCADE', 'CASCADE'); // FK
-        $this->forge->addForeignKey('nilai_huruf', 'nilai_mutu', 'nilai_huruf', 'CASCADE', 'CASCADE'); // FK
+        // Foreign key ke nilai_mutu dibuat optional karena nilai_huruf bisa null
+        // $this->forge->addForeignKey('nilai_huruf', 'nilai_mutu', 'nilai_huruf', 'SET NULL', 'CASCADE'); // FK - Disabled untuk menghindari constraint error
         $this->forge->createTable('rencana_studi');
     }
 
     public function down()
     {
-        //
+        $this->forge->dropTable('rencana_studi');
     }
 }
