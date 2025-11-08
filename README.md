@@ -285,7 +285,7 @@ Aplikasi menggunakan komponen UI modern dengan:
   - Print-friendly KRS layout
   - Optimized untuk cetak dokumen
 
-## �️D Database Schema
+## D Database Schema
 
 Aplikasi menggunakan 8 tabel utama:
 
