@@ -170,6 +170,7 @@ class DosenController extends BaseController
         $nilaiData = $json->nilai ?? [];
         
         log_message('info', 'Save Nilai - NIDN: ' . $nidn . ', Jadwal ID: ' . $jadwalId);
+        log_message('info', 'Nilai Data Count: ' . count($nilaiData));
         log_message('info', 'Nilai Data: ' . json_encode($nilaiData));
 
         if (!$jadwalId) {
@@ -197,11 +198,24 @@ class DosenController extends BaseController
         foreach ($nilaiData as $data) {
             $dataArray = (array) $data;
             
-            if (!empty($dataArray['nilai_angka'])) {
-                $nilaiAngka = floatval($dataArray['nilai_angka']);
-                $nilaiHuruf = $this->convertToHuruf($nilaiAngka);
-                
-                log_message('info', "Updating nilai for NIM: {$dataArray['nim']}, Nilai: {$nilaiAngka}, Huruf: {$nilaiHuruf}");
+            // Check if NIM exists
+            if (!isset($dataArray['nim'])) {
+                log_message('error', 'NIM not found in data');
+                continue;
+            }
+            
+            // Check if nilai_angka key exists (can be null for deletion)
+            if (array_key_exists('nilai_angka', $dataArray)) {
+                // If nilai_angka is null, delete the nilai
+                if ($dataArray['nilai_angka'] === null) {
+                    $nilaiAngka = null;
+                    $nilaiHuruf = null;
+                    log_message('info', "Deleting nilai for NIM: {$dataArray['nim']}");
+                } else {
+                    $nilaiAngka = floatval($dataArray['nilai_angka']);
+                    $nilaiHuruf = $this->convertToHuruf($nilaiAngka);
+                    log_message('info', "Updating nilai for NIM: {$dataArray['nim']}, Nilai: {$nilaiAngka}, Huruf: {$nilaiHuruf}");
+                }
                 
                 try {
                     $result = $rencanaStudiModel->updateNilai(
@@ -213,28 +227,46 @@ class DosenController extends BaseController
 
                     if ($result) {
                         $successCount++;
-                        log_message('info', "Successfully saved nilai for NIM: {$dataArray['nim']}");
+                        if ($nilaiAngka === null) {
+                            log_message('info', "Successfully deleted nilai for NIM: {$dataArray['nim']}");
+                        } else {
+                            log_message('info', "Successfully saved nilai for NIM: {$dataArray['nim']}");
+                        }
                     } else {
-                        $errors[] = "Gagal menyimpan nilai untuk NIM: " . $dataArray['nim'];
-                        log_message('error', "Failed to save nilai for NIM: {$dataArray['nim']}");
+                        $errors[] = "Gagal memproses nilai untuk NIM: " . $dataArray['nim'];
+                        log_message('error', "Failed to process nilai for NIM: {$dataArray['nim']}");
                     }
                 } catch (\Exception $e) {
                     $errors[] = "Error untuk NIM {$dataArray['nim']}: " . $e->getMessage();
-                    log_message('error', "Exception saving nilai: " . $e->getMessage());
+                    log_message('error', "Exception processing nilai: " . $e->getMessage());
                 }
+            } else {
+                log_message('warning', "nilai_angka key not found for NIM: {$dataArray['nim']}");
             }
         }
 
         if ($successCount > 0) {
+            // Check if we're deleting or saving
+            $isDeleting = false;
+            foreach ($nilaiData as $data) {
+                $dataArray = (array) $data;
+                if (isset($dataArray['nilai_angka']) && $dataArray['nilai_angka'] === null) {
+                    $isDeleting = true;
+                    break;
+                }
+            }
+            
+            $message = $isDeleting ? "Berhasil menghapus {$successCount} nilai" : "Berhasil menyimpan {$successCount} nilai";
+            
             return $this->response->setJSON([
                 'success' => true,
-                'message' => "Berhasil menyimpan {$successCount} nilai",
+                'message' => $message,
                 'errors' => $errors
             ]);
         } else {
             return $this->response->setJSON([
                 'success' => false,
-                'message' => 'Tidak ada nilai yang disimpan',
+                'message' => 'Tidak ada nilai yang diproses',
                 'errors' => $errors
             ]);
         }

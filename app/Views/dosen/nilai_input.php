@@ -2,6 +2,29 @@
 
 <?= $this->section('head') ?>
 <style>
+    /* Custom Confirm Dialog Styles */
+    #confirm-dialog-overlay {
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: 100000 !important;
+    }
+
+    #confirm-dialog {
+        z-index: 100001 !important;
+        animation: slideIn 0.3s ease-out;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: scale(0.95) translateY(-20px);
+        }
+        to {
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+    }
+
     /* Modal positioning improvements with proper z-index */
     #nilai-modal {
         backdrop-filter: blur(4px);
@@ -133,6 +156,40 @@
                 <p class="mt-1 text-sm text-gray-500">Anda belum memiliki jadwal mengajar yang terdaftar.</p>
             </div>
         <?php endif; ?>
+    </div>
+</div>
+
+<!-- Custom Confirm Dialog -->
+<div id="confirm-dialog-overlay" class="fixed inset-0 hidden" style="z-index: 100000 !important;">
+    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity"></div>
+    <div class="fixed inset-0 overflow-y-auto">
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div id="confirm-dialog" class="relative bg-white rounded-lg shadow-xl max-w-md w-full p-6">
+                <div class="flex items-start">
+                    <div id="confirm-icon" class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100">
+                        <svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                        </svg>
+                    </div>
+                    <div class="ml-4 flex-1">
+                        <h3 id="confirm-title" class="text-lg font-medium text-gray-900 mb-2">
+                            Konfirmasi
+                        </h3>
+                        <p id="confirm-message" class="text-sm text-gray-500">
+                            Apakah Anda yakin?
+                        </p>
+                    </div>
+                </div>
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button id="confirm-cancel-btn" type="button" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
+                        Batal
+                    </button>
+                    <button id="confirm-ok-btn" type="button" class="px-4 py-2 text-sm font-medium text-white bg-yellow-600 border border-transparent rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors">
+                        Ya, Lanjutkan
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -291,6 +348,73 @@
     let selectedJadwalId = null;
     let mahasiswaData = [];
 
+    // Custom Confirm Dialog
+    function showConfirmDialog(options = {}) {
+        return new Promise((resolve) => {
+            const overlay = document.getElementById('confirm-dialog-overlay');
+            const title = document.getElementById('confirm-title');
+            const message = document.getElementById('confirm-message');
+            const okBtn = document.getElementById('confirm-ok-btn');
+            const cancelBtn = document.getElementById('confirm-cancel-btn');
+            const icon = document.getElementById('confirm-icon');
+
+            // Set content
+            title.textContent = options.title || 'Konfirmasi';
+            message.textContent = options.message || 'Apakah Anda yakin?';
+            okBtn.textContent = options.confirmText || 'Ya, Lanjutkan';
+            cancelBtn.textContent = options.cancelText || 'Batal';
+
+            // Set icon color based on type
+            if (options.type === 'danger') {
+                icon.className = 'flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100';
+                icon.innerHTML = `<svg class="h-6 w-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>`;
+                okBtn.className = 'px-4 py-2 text-sm font-medium text-white bg-red-600 border border-transparent rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors';
+            } else {
+                icon.className = 'flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-yellow-100';
+                icon.innerHTML = `<svg class="h-6 w-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path>
+                </svg>`;
+                okBtn.className = 'px-4 py-2 text-sm font-medium text-white bg-yellow-600 border border-transparent rounded-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-yellow-500 transition-colors';
+            }
+
+            // Show dialog
+            overlay.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+
+            // Handle buttons
+            const handleOk = () => {
+                cleanup();
+                resolve(true);
+            };
+
+            const handleCancel = () => {
+                cleanup();
+                resolve(false);
+            };
+
+            const cleanup = () => {
+                overlay.classList.add('hidden');
+                document.body.style.overflow = '';
+                okBtn.removeEventListener('click', handleOk);
+                cancelBtn.removeEventListener('click', handleCancel);
+            };
+
+            okBtn.addEventListener('click', handleOk);
+            cancelBtn.addEventListener('click', handleCancel);
+
+            // ESC key to cancel
+            const handleEsc = (e) => {
+                if (e.key === 'Escape') {
+                    handleCancel();
+                    document.removeEventListener('keydown', handleEsc);
+                }
+            };
+            document.addEventListener('keydown', handleEsc);
+        });
+    }
+
     // Modal Functions
     function openNilaiModal(jadwalId) {
         selectedJadwalId = jadwalId;
@@ -352,22 +476,31 @@
                 console.log('Response data:', data); // Debug log
                 
                 if (data.success) {
-                    mahasiswaData = data.mahasiswa || [];
+                    // Normalize data - convert null to empty string
+                    mahasiswaData = (data.mahasiswa || []).map(m => ({
+                        ...m,
+                        nilai_angka: m.nilai_angka === null ? '' : m.nilai_angka,
+                        nilai_huruf: m.nilai_huruf === null ? '' : m.nilai_huruf
+                    }));
+                    
+                    console.log('Normalized mahasiswa data:', mahasiswaData); // Debug log
                     
                     if (mahasiswaData.length === 0) {
-                        window.toast.warning('⚠️ Tidak ada mahasiswa yang terdaftar di kelas ini');
+                        window.toast.warning('⚠️ Tidak ada mahasiswa yang terdaftar di kelas ini', 3000);
+                        closeNilaiModal();
+                        return;
                     }
                     
                     renderModalContent();
                     updateModalClassInfo(data.jadwal);
                 } else {
-                    window.toast.error('❌ ' + (data.message || 'Gagal memuat data mahasiswa'));
+                    window.toast.error('❌ ' + (data.message || 'Gagal memuat data mahasiswa'), 4000);
                     closeNilaiModal();
                 }
             })
             .catch(error => {
                 console.error('Error loading mahasiswa:', error);
-                window.toast.error('❌ Terjadi kesalahan saat memuat data mahasiswa');
+                window.toast.error('❌ Terjadi kesalahan saat memuat data mahasiswa', 4000);
                 closeNilaiModal();
             });
     }
@@ -402,11 +535,12 @@
 
     function updateStats() {
         const total = mahasiswaData.length;
-        const sudahDinilai = mahasiswaData.filter(m => m.nilai_angka !== '').length;
+        const sudahDinilai = mahasiswaData.filter(m => m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined).length;
         const belumDinilai = total - sudahDinilai;
         const tidakLulus = mahasiswaData.filter(m => {
+            if (m.nilai_angka === null || m.nilai_angka === '' || m.nilai_angka === undefined) return false;
             const nilai = parseFloat(m.nilai_angka);
-            return m.nilai_angka !== '' && nilai < 55;
+            return nilai < 55;
         }).length;
 
         document.getElementById('total-mahasiswa').textContent = total;
@@ -422,6 +556,10 @@
         mahasiswaData.forEach((mahasiswa, index) => {
             const row = document.createElement('tr');
             row.className = 'hover:bg-gray-50 transition-colors';
+            
+            // Handle null or undefined nilai_angka
+            const nilaiAngkaValue = (mahasiswa.nilai_angka === null || mahasiswa.nilai_angka === undefined) ? '' : mahasiswa.nilai_angka;
+            const nilaiHurufValue = (mahasiswa.nilai_huruf === null || mahasiswa.nilai_huruf === undefined) ? '' : mahasiswa.nilai_huruf;
 
             row.innerHTML = `
                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">${index + 1}</td>
@@ -431,13 +569,14 @@
                     <input type="number" 
                            min="0" 
                            max="100" 
-                           value="${mahasiswa.nilai_angka}"
+                           value="${nilaiAngkaValue}"
                            onchange="updateNilai(${index}, this.value)"
+                           placeholder="0-100"
                            class="w-20 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:border-yellow-500 text-sm transition-colors">
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
-                    <span id="nilai-huruf-${index}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${getNilaiHurufClass(mahasiswa.nilai_huruf)}">
-                        ${mahasiswa.nilai_huruf || '-'}
+                    <span id="nilai-huruf-${index}" class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-colors ${getNilaiHurufClass(nilaiHurufValue)}">
+                        ${nilaiHurufValue || '-'}
                     </span>
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -504,37 +643,128 @@
     }
 
     function getStatus(nilaiAngka) {
-        if (!nilaiAngka || nilaiAngka === '') return 'Belum Diisi';
+        if (nilaiAngka === null || nilaiAngka === '' || nilaiAngka === undefined) return 'Belum Diisi';
         const nilai = parseFloat(nilaiAngka);
         // Batas lulus adalah C (55)
         return nilai >= 55 ? 'Lulus' : 'Tidak Lulus';
     }
 
     function getStatusClass(nilaiAngka) {
-        if (!nilaiAngka || nilaiAngka === '') return 'bg-gray-100 text-gray-800';
+        if (nilaiAngka === null || nilaiAngka === '' || nilaiAngka === undefined) return 'bg-gray-100 text-gray-800';
         const nilai = parseFloat(nilaiAngka);
         // Batas lulus adalah C (55)
         return nilai >= 55 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
     }
 
-    function clearAllNilai() {
-        if (!confirm('Apakah Anda yakin ingin menghapus semua nilai?')) {
+    async function clearAllNilai() {
+        // Check if there are any grades to clear
+        const hasGrades = mahasiswaData.some(m => m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined);
+        
+        if (!hasGrades) {
+            window.toast.warning('⚠️ Tidak ada nilai yang perlu dihapus', 2000);
             return;
         }
 
-        mahasiswaData.forEach(mahasiswa => {
-            mahasiswa.nilai_angka = '';
-            mahasiswa.nilai_huruf = '';
+        // Check if any nilai is already saved in database (has nilai_angka from server)
+        const hasSavedGrades = mahasiswaData.some(m => {
+            // If nilai_angka exists and is not empty, it means it was loaded from database
+            return m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined;
         });
 
-        renderMahasiswaTable();
-        updateStats();
-        window.toast.info('🗑️ Semua nilai telah dihapus', 2000);
+        let message = 'Apakah Anda yakin ingin menghapus semua nilai yang telah diinput?\n\n';
+        if (hasSavedGrades) {
+            message += '⚠️ PERHATIAN: Nilai yang sudah tersimpan akan dihapus secara permanen!';
+        } else {
+            message += 'Tindakan ini hanya menghapus nilai di form yang belum disimpan.';
+        }
+
+        const confirmed = await showConfirmDialog({
+            title: 'Hapus Semua Nilai',
+            message: message,
+            confirmText: 'Ya, Hapus Semua',
+            cancelText: 'Batal',
+            type: 'danger'
+        });
+
+        if (!confirmed) {
+            return;
+        }
+
+        // If there are saved grades, we need to delete from database
+        if (hasSavedGrades) {
+            const loadingToast = window.toast.info('🗑️ Menghapus nilai...', 10000);
+
+            // Prepare data to delete (set nilai to null for ALL mahasiswa that have grades)
+            const nilaiToDelete = mahasiswaData
+                .filter(m => m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined)
+                .map(m => ({
+                    nim: m.nim,
+                    nilai_angka: null,
+                    nilai_huruf: null
+                }));
+
+            console.log('Deleting nilai for:', nilaiToDelete); // Debug log
+            console.log('Total to delete:', nilaiToDelete.length); // Debug log
+
+            // Check if there's actually data to delete
+            if (nilaiToDelete.length === 0) {
+                window.toast.remove(loadingToast);
+                window.toast.warning('⚠️ Tidak ada nilai yang tersimpan', 2000);
+                return;
+            }
+
+            const requestData = {
+                jadwal_id: selectedJadwalId,
+                nilai: nilaiToDelete
+            };
+            
+            console.log('Request data:', JSON.stringify(requestData)); // Debug log
+
+            try {
+                const response = await fetch('<?= base_url('dosen/nilai/save') ?>', {
+                    method: 'POST',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+
+                const data = await response.json();
+                window.toast.remove(loadingToast);
+
+                if (data.success) {
+                    window.toast.success('✅ Semua nilai berhasil dihapus', 3000);
+                    
+                    // Reload data from server
+                    setTimeout(() => {
+                        loadMahasiswaData(selectedJadwalId);
+                    }, 1500);
+                } else {
+                    window.toast.error('❌ Gagal menghapus nilai: ' + (data.message || 'Terjadi kesalahan'), 4000);
+                }
+            } catch (error) {
+                window.toast.remove(loadingToast);
+                console.error('Error deleting nilai:', error);
+                window.toast.error('❌ Terjadi kesalahan saat menghapus nilai', 4000);
+            }
+        } else {
+            // Just clear from form (not saved yet)
+            mahasiswaData.forEach((mahasiswa) => {
+                mahasiswa.nilai_angka = '';
+                mahasiswa.nilai_huruf = '';
+            });
+
+            // Re-render table to update display
+            renderMahasiswaTable();
+            updateStats();
+            window.toast.success('✅ Semua nilai telah dihapus dari form', 2000);
+        }
     }
 
     function saveNilai() {
         // Validate that at least some grades are entered
-        const hasGrades = mahasiswaData.some(m => m.nilai_angka && m.nilai_angka !== '');
+        const hasGrades = mahasiswaData.some(m => m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined);
 
         if (!hasGrades) {
             window.toast.warning('⚠️ Harap isi minimal satu nilai sebelum menyimpan', 4000);
@@ -543,7 +773,7 @@
 
         // Filter only mahasiswa with nilai
         const nilaiToSave = mahasiswaData
-            .filter(m => m.nilai_angka && m.nilai_angka !== '')
+            .filter(m => m.nilai_angka !== null && m.nilai_angka !== '' && m.nilai_angka !== undefined)
             .map(m => ({
                 nim: m.nim,
                 nilai_angka: parseFloat(m.nilai_angka),
@@ -590,15 +820,15 @@
                     // Reload data to show updated values
                     setTimeout(() => {
                         loadMahasiswaData(selectedJadwalId);
-                    }, 1000);
+                    }, 1500);
                 } else {
-                    window.toast.error('❌ ' + (data.message || 'Gagal menyimpan nilai'));
+                    window.toast.error('❌ ' + (data.message || 'Gagal menyimpan nilai'), 4000);
                 }
             })
             .catch(error => {
                 window.toast.remove(loadingToast);
                 console.error('Error saving nilai:', error);
-                window.toast.error('❌ Terjadi kesalahan saat menyimpan nilai');
+                window.toast.error('❌ Terjadi kesalahan saat menyimpan nilai', 4000);
             });
     }
 </script>

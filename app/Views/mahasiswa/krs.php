@@ -94,7 +94,7 @@
     </div>
 
     <!-- Status KRS -->
-    <!-- <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-yellow-500">
+    <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-yellow-500">
         <div class="flex items-center">
             <div class="flex-shrink-0">
                 <div class="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
@@ -125,7 +125,7 @@
                 </p>
             </div>
         </div>
-    </div> -->
+    </div>
 
     <!-- Sisa Kuota -->
     <div class="bg-white rounded-lg shadow-lg p-6 border-l-4 border-purple-500">
