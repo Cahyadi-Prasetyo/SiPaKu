@@ -517,7 +517,7 @@ server {
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## � Trooubleshooting
+## Trooubleshooting
 
 ### Error: "Class not found"
 ```bash
@@ -563,7 +563,7 @@ chmod -R 777 writable/
 - Belum ada sistem notifikasi email
 - Belum ada fitur reset password
 
-## � AFuture Enhancements
+## A Future Enhancements
 
 - [ ] Dark/Light mode toggle
 - [ ] Email notifications untuk persetujuan KRS
