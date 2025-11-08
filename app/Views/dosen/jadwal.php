@@ -179,29 +179,6 @@
     <?php endif; ?>
 </div>
 
-<!-- Summary Statistics -->
-<div class="bg-white rounded-lg shadow-lg p-6">
-    <h3 class="text-lg font-semibold text-gray-800 mb-4">Ringkasan Jadwal</h3>
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="text-center p-4 bg-yellow-50 rounded-lg">
-            <div class="text-2xl font-bold text-yellow-600"><?= count($jadwal_mengajar ?? []) ?></div>
-            <div class="text-sm text-gray-600">Total Jadwal</div>
-        </div>
-        <div class="text-center p-4 bg-blue-50 rounded-lg">
-            <div class="text-2xl font-bold text-blue-600"><?= $stats['total_mahasiswa'] ?? '0' ?></div>
-            <div class="text-sm text-gray-600">Total Mahasiswa</div>
-        </div>
-        <div class="text-center p-4 bg-purple-50 rounded-lg">
-            <div class="text-2xl font-bold text-purple-600"><?= $stats['total_matkul'] ?? '0' ?></div>
-            <div class="text-sm text-gray-600">Mata Kuliah</div>
-        </div>
-        <div class="text-center p-4 bg-yellow-50 rounded-lg">
-            <div class="text-2xl font-bold text-yellow-600"><?= $stats['nilai_pending'] ?? '0' ?></div>
-            <div class="text-sm text-gray-600">Nilai Pending</div>
-        </div>
-    </div>
-</div>
-
 <script>
     // Filter functions
     function filterJadwal() {

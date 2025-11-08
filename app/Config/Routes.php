@@ -130,9 +130,26 @@ $routes->group('mahasiswa', ['filter' => 'auth:mahasiswa'], function($routes) {
     // Dashboard
     $routes->get('dashboard', 'Mahasiswa\MahasiswaController::dashboard');
     
+    // Jadwal Kuliah
+    $routes->get('jadwal', 'Mahasiswa\MahasiswaController::jadwal');
+    
+    // Nilai & Transkrip
+    $routes->get('nilai', 'Mahasiswa\MahasiswaController::nilai');
+    
+    // Kartu Rencana Studi
+    $routes->get('krs', 'Mahasiswa\MahasiswaController::krs');
+    $routes->post('krs/add', 'Mahasiswa\MahasiswaController::addKRS');
+    $routes->post('krs/remove', 'Mahasiswa\MahasiswaController::removeKRS');
+    $routes->post('krs/submit', 'Mahasiswa\MahasiswaController::submitKRS');
+    $routes->get('krs/print', 'Mahasiswa\MahasiswaController::printKRS');
+    
+    // Hasil Studi
+    $routes->get('hasil-studi', 'Mahasiswa\MahasiswaController::hasilStudi');
+    
     // Future features
-    // $routes->get('jadwal', 'Mahasiswa\MahasiswaController::jadwal');
-    // $routes->get('nilai', 'Mahasiswa\MahasiswaController::nilai');
-    // $routes->get('transkrip', 'Mahasiswa\MahasiswaController::transkrip');
-    // $routes->get('krs', 'Mahasiswa\MahasiswaController::krs');
+    // $routes->get('presensi', 'Mahasiswa\MahasiswaController::presensi');
+    // $routes->get('tugas', 'Mahasiswa\MahasiswaController::tugas');
+    // $routes->get('pembayaran', 'Mahasiswa\MahasiswaController::pembayaran');
+    // $routes->get('konsultasi', 'Mahasiswa\MahasiswaController::konsultasi');
+    // $routes->get('perpustakaan', 'Mahasiswa\MahasiswaController::perpustakaan');
 });

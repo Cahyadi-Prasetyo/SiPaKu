@@ -8,90 +8,125 @@ class RencanaStudiSeeder extends Seeder
 {
     public function run()
     {
-        $data = $this->generateRencanaStudiData();
+        echo "🔄 Membuat ulang data Rencana Studi...\n\n";
         
-        $this->db->table('rencana_studi')->insertBatch($data);
+        // Ambil data mahasiswa, jadwal, dan nilai_mutu yang ada
+        $mahasiswaModel = new \App\Models\MahasiswaModel();
+        $jadwalModel = new \App\Models\JadwalModel();
         
-        echo "Rencana Studi data seeded successfully! (" . count($data) . " records)\n";
-    }
-    
-    private function generateRencanaStudiData()
-    {
-        $grades = ['A', 'AB', 'B', 'BC', 'C', 'D', 'E'];
-        $gradeWeights = [20, 25, 30, 15, 7, 2, 1]; // Percentage distribution
+        // Ambil mahasiswa dengan urutan NIM (ascending)
+        $mahasiswa = $mahasiswaModel->orderBy('nim', 'ASC')->findAll();
+        $jadwal = $jadwalModel->findAll();
         
-        $data = [];
-        $currentYear = date('Y');
+        // Ambil nilai mutu dari database
+        $nilaiMutuData = $this->db->table('nilai_mutu')->get()->getResultArray();
         
-        // Generate enrollments for each student
-        for ($studentIndex = 1; $studentIndex <= 20; $studentIndex++) {
-            $nim = $currentYear . sprintf('%06d', $studentIndex);
+        if (empty($mahasiswa)) {
+            echo "Data mahasiswa tidak ditemukan. Jalankan seeder mahasiswa terlebih dahulu.\n";
+            return;
+        }
+        
+        if (empty($jadwal)) {
+            echo "Data jadwal tidak ditemukan. Jalankan seeder jadwal terlebih dahulu.\n";
+            return;
+        }
+        
+        if (empty($nilaiMutuData)) {
+            echo "Data nilai_mutu tidak ditemukan. Jalankan seeder nilai_mutu terlebih dahulu.\n";
+            return;
+        }
+        
+        // Buat array nilai huruf yang tersedia
+        $nilaiHurufList = array_column($nilaiMutuData, 'nilai_huruf');
+        
+        $rencanaStudiData = [];
+        
+        // Untuk SEMUA mahasiswa, ambil beberapa jadwal secara random
+        foreach ($mahasiswa as $mhs) {
+            echo "Memproses mahasiswa: {$mhs['nama']} (NIM: {$mhs['nim']})\n";
             
-            // Each student enrolls in 5-8 random courses
-            $numCourses = rand(5, 8);
-            $enrolledJadwalIds = [];
+            // Ambil 5-8 mata kuliah secara random untuk setiap mahasiswa
+            $jumlahMatkul = rand(5, min(8, count($jadwal)));
             
-            for ($i = 0; $i < $numCourses; $i++) {
-                // Select random jadwal (1-30, since we have 10 courses x 3 classes)
-                do {
-                    $jadwalId = rand(1, 30);
-                } while (in_array($jadwalId, $enrolledJadwalIds));
-                
-                $enrolledJadwalIds[] = $jadwalId;
-                
-                // Generate grade based on weighted distribution
-                $grade = $this->getWeightedRandomGrade($grades, $gradeWeights);
-                $nilaiAngka = $this->generateNilaiAngka($grade);
-                
-                $data[] = [
-                    'nim' => $nim,
-                    'id_jadwal' => $jadwalId,
-                    'nilai_huruf' => $grade,
-                    'nilai_angka' => $nilaiAngka,
+            // Shuffle jadwal untuk random selection
+            $shuffledJadwal = $jadwal;
+            shuffle($shuffledJadwal);
+            
+            // Ambil sejumlah jadwal yang dibutuhkan
+            $selectedJadwal = array_slice($shuffledJadwal, 0, $jumlahMatkul);
+            
+            foreach ($selectedJadwal as $jadwalItem) {
+                // SEMUA data BELUM ada nilai (NULL)
+                // Nilai akan diisi oleh dosen melalui fitur input nilai
+                $rencanaStudiData[] = [
+                    'nim' => $mhs['nim'],
+                    'id_jadwal' => $jadwalItem['id'],
+                    'nilai_angka' => null,
+                    'nilai_huruf' => null,
                     'created_at' => date('Y-m-d H:i:s'),
                     'updated_at' => date('Y-m-d H:i:s')
                 ];
             }
         }
         
-        return $data;
-    }
-    
-    private function getWeightedRandomGrade($grades, $weights)
-    {
-        $totalWeight = array_sum($weights);
-        $random = rand(1, $totalWeight);
-        
-        $currentWeight = 0;
-        for ($i = 0; $i < count($grades); $i++) {
-            $currentWeight += $weights[$i];
-            if ($random <= $currentWeight) {
-                return $grades[$i];
+        // Insert data
+        if (!empty($rencanaStudiData)) {
+            echo "\n🗑️  Menghapus data lama...\n";
+            // Hapus data lama dan reset auto increment
+            $this->db->table('rencana_studi')->truncate();
+            
+            // Reset auto increment ke 1
+            $this->db->query('ALTER TABLE rencana_studi AUTO_INCREMENT = 1');
+            
+            echo "💾 Menyimpan data baru...\n";
+            // Insert data baru (ID akan dimulai dari 1)
+            $this->db->table('rencana_studi')->insertBatch($rencanaStudiData);
+            
+            echo "\n✅ Berhasil menambahkan " . count($rencanaStudiData) . " data rencana studi untuk " . count($mahasiswa) . " mahasiswa.\n";
+            
+            echo "\n📊 Statistik:\n";
+            echo "   - Total rencana studi: " . count($rencanaStudiData) . "\n";
+            echo "   - Status nilai: SEMUA BELUM ADA NILAI (NULL)\n";
+            echo "   - Catatan: Nilai akan diisi oleh dosen melalui fitur input nilai\n";
+            
+            // Tampilkan mahasiswa pertama
+            if (!empty($mahasiswa)) {
+                echo "\n👤 Mahasiswa Pertama:\n";
+                echo "   - NIM: " . $mahasiswa[0]['nim'] . "\n";
+                echo "   - Nama: " . $mahasiswa[0]['nama'] . "\n";
+                
+                // Hitung jumlah rencana studi untuk mahasiswa pertama
+                $countFirst = count(array_filter($rencanaStudiData, function($item) use ($mahasiswa) {
+                    return $item['nim'] === $mahasiswa[0]['nim'];
+                }));
+                echo "   - Jumlah mata kuliah: " . $countFirst . "\n";
             }
+            
+            echo "\n✨ Data rencana studi berhasil dibuat ulang dengan ID dimulai dari 1!\n";
         }
-        
-        return $grades[0]; // fallback
     }
     
-    private function generateNilaiAngka($grade)
+    /**
+     * Generate nilai angka berdasarkan nilai huruf
+     * Mengikuti standar yang ada di tabel nilai_mutu
+     */
+    private function generateNilaiAngka($nilaiHuruf)
     {
-        switch ($grade) {
-            case 'A':
-                return rand(85, 100) + (rand(0, 99) / 100);
-            case 'AB':
-                return rand(80, 84) + (rand(0, 99) / 100);
-            case 'B':
-                return rand(75, 79) + (rand(0, 99) / 100);
-            case 'BC':
-                return rand(70, 74) + (rand(0, 99) / 100);
-            case 'C':
-                return rand(60, 69) + (rand(0, 99) / 100);
-            case 'D':
-                return rand(50, 59) + (rand(0, 99) / 100);
-            case 'E':
-                return rand(0, 49) + (rand(0, 99) / 100);
-            default:
-                return 75.00;
+        // Range nilai angka untuk setiap nilai huruf
+        $ranges = [
+            'A'  => [85, 100],  // 4.00
+            'A-' => [80, 84],   // 3.50
+            'B'  => [70, 79],   // 3.00
+            'B-' => [65, 69],   // 2.50
+            'C'  => [55, 64],   // 2.00
+            'D'  => [40, 54],   // 1.00
+            'E'  => [0, 39]     // 0.00
+        ];
+        
+        if (isset($ranges[$nilaiHuruf])) {
+            return rand($ranges[$nilaiHuruf][0], $ranges[$nilaiHuruf][1]);
         }
+        
+        return rand(55, 85); // Default jika tidak ditemukan
     }
 }

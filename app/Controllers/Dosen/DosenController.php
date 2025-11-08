@@ -59,7 +59,7 @@ class DosenController extends BaseController
         
         // Get all jadwal for this dosen
         $jadwalMengajar = $this->jadwalModel
-            ->select('jadwal.*, mata_kuliah.nama_mata_kuliah, mata_kuliah.sks, ruangan.nama_ruangan')
+            ->select('jadwal.*, mata_kuliah.nama_mata_kuliah, mata_kuliah.sks, ruangan.nama_ruangan, (SELECT COUNT(DISTINCT nim) FROM rencana_studi WHERE rencana_studi.id_jadwal = jadwal.id) as jumlah_mahasiswa')
             ->join('mata_kuliah', 'mata_kuliah.id_mata_kuliah = jadwal.id_mata_kuliah')
             ->join('ruangan', 'ruangan.id_ruangan = jadwal.id_ruangan')
             ->where('jadwal.nidn', $nidn)
@@ -98,9 +98,13 @@ class DosenController extends BaseController
     {
         $nidn = session()->get('kode');
         
-        // Get all jadwal for this dosen
+        // Get all jadwal for this dosen with jumlah mahasiswa
         $jadwalMengajar = $this->jadwalModel
-            ->select('jadwal.*, mata_kuliah.nama_mata_kuliah, mata_kuliah.sks, ruangan.nama_ruangan')
+            ->select('jadwal.*, 
+                     mata_kuliah.nama_mata_kuliah, 
+                     mata_kuliah.sks, 
+                     ruangan.nama_ruangan,
+                     (SELECT COUNT(DISTINCT nim) FROM rencana_studi WHERE rencana_studi.id_jadwal = jadwal.id) as jumlah_mahasiswa')
             ->join('mata_kuliah', 'mata_kuliah.id_mata_kuliah = jadwal.id_mata_kuliah')
             ->join('ruangan', 'ruangan.id_ruangan = jadwal.id_ruangan')
             ->where('jadwal.nidn', $nidn)
@@ -150,14 +154,36 @@ class DosenController extends BaseController
 
     public function saveNilai()
     {
+        // Get raw input for JSON data
+        $json = $this->request->getJSON();
+        
+        if (!$json) {
+            log_message('error', 'No JSON data received');
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Data tidak valid'
+            ]);
+        }
+        
         $nidn = session()->get('kode');
-        $jadwalId = $this->request->getPost('jadwal_id');
-        $nilaiData = $this->request->getPost('nilai');
+        $jadwalId = $json->jadwal_id ?? null;
+        $nilaiData = $json->nilai ?? [];
+        
+        log_message('info', 'Save Nilai - NIDN: ' . $nidn . ', Jadwal ID: ' . $jadwalId);
+        log_message('info', 'Nilai Data: ' . json_encode($nilaiData));
+
+        if (!$jadwalId) {
+            return $this->response->setJSON([
+                'success' => false,
+                'message' => 'Jadwal ID tidak ditemukan'
+            ]);
+        }
 
         // Verify that this jadwal belongs to the logged-in dosen
         $jadwal = $this->jadwalModel->where('id', $jadwalId)->where('nidn', $nidn)->first();
         
         if (!$jadwal) {
+            log_message('error', 'Jadwal not found or not owned by dosen');
             return $this->response->setJSON([
                 'success' => false,
                 'message' => 'Jadwal tidak ditemukan atau bukan milik Anda'
@@ -169,20 +195,32 @@ class DosenController extends BaseController
         $errors = [];
 
         foreach ($nilaiData as $data) {
-            if (!empty($data['nilai_angka'])) {
-                $nilaiHuruf = $this->convertToHuruf($data['nilai_angka']);
+            $dataArray = (array) $data;
+            
+            if (!empty($dataArray['nilai_angka'])) {
+                $nilaiAngka = floatval($dataArray['nilai_angka']);
+                $nilaiHuruf = $this->convertToHuruf($nilaiAngka);
                 
-                $result = $rencanaStudiModel->updateNilai(
-                    $data['nim'],
-                    $jadwalId,
-                    $data['nilai_angka'],
-                    $nilaiHuruf
-                );
+                log_message('info', "Updating nilai for NIM: {$dataArray['nim']}, Nilai: {$nilaiAngka}, Huruf: {$nilaiHuruf}");
+                
+                try {
+                    $result = $rencanaStudiModel->updateNilai(
+                        $dataArray['nim'],
+                        $jadwalId,
+                        $nilaiAngka,
+                        $nilaiHuruf
+                    );
 
-                if ($result) {
-                    $successCount++;
-                } else {
-                    $errors[] = "Gagal menyimpan nilai untuk NIM: " . $data['nim'];
+                    if ($result) {
+                        $successCount++;
+                        log_message('info', "Successfully saved nilai for NIM: {$dataArray['nim']}");
+                    } else {
+                        $errors[] = "Gagal menyimpan nilai untuk NIM: " . $dataArray['nim'];
+                        log_message('error', "Failed to save nilai for NIM: {$dataArray['nim']}");
+                    }
+                } catch (\Exception $e) {
+                    $errors[] = "Error untuk NIM {$dataArray['nim']}: " . $e->getMessage();
+                    log_message('error', "Exception saving nilai: " . $e->getMessage());
                 }
             }
         }
@@ -206,17 +244,15 @@ class DosenController extends BaseController
     {
         $nilai = floatval($nilaiAngka);
         
-        if ($nilai >= 85) return 'A';
-        if ($nilai >= 80) return 'A-';
-        if ($nilai >= 75) return 'B+';
-        if ($nilai >= 70) return 'B';
-        if ($nilai >= 65) return 'B-';
-        if ($nilai >= 60) return 'C+';
-        if ($nilai >= 55) return 'C';
-        if ($nilai >= 50) return 'C-';
-        if ($nilai >= 45) return 'D+';
-        if ($nilai >= 40) return 'D';
-        return 'E';
+        // Sesuaikan dengan tabel nilai_mutu yang ada
+        // A = 4.00, A- = 3.50, B = 3.00, B- = 2.50, C = 2.00, D = 1.00, E = 0.00
+        if ($nilai >= 85) return 'A';      // 85-100
+        if ($nilai >= 80) return 'A-';     // 80-84
+        if ($nilai >= 70) return 'B';      // 70-79
+        if ($nilai >= 65) return 'B-';     // 65-69
+        if ($nilai >= 55) return 'C';      // 55-64 (Batas Lulus)
+        if ($nilai >= 40) return 'D';      // 40-54
+        return 'E';                         // 0-39
     }
 
     private function getJadwalHariIni($nidn)

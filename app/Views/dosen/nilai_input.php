@@ -2,18 +2,29 @@
 
 <?= $this->section('head') ?>
 <style>
-    /* Modal positioning improvements */
+    /* Modal positioning improvements with proper z-index */
     #nilai-modal {
         backdrop-filter: blur(4px);
         -webkit-backdrop-filter: blur(4px);
+        z-index: 99999 !important;
+    }
+    
+    #nilai-modal .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background-color: rgba(17, 24, 39, 0.5);
+        z-index: 99998 !important;
     }
     
     #nilai-modal .modal-container {
+        position: fixed;
+        inset: 0;
         display: flex;
         align-items: center;
         justify-content: center;
-        min-height: 100vh;
         padding: 1rem;
+        z-index: 99999 !important;
+        overflow-y: auto;
     }
     
     #nilai-modal .modal-panel {
@@ -28,10 +39,18 @@
         max-height: 90vh;
         display: flex;
         flex-direction: column;
+        z-index: 100000 !important;
+        margin: auto;
     }
     
     #nilai-modal:not(.hidden) .modal-panel {
         transform: scale(1);
+    }
+    
+    /* Ensure modal content is above everything */
+    #nilai-modal .modal-panel * {
+        position: relative;
+        z-index: 100001 !important;
     }
     
     @media (max-width: 640px) {
@@ -62,6 +81,19 @@
 <!-- Pilih Jadwal -->
 <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">Pilih Kelas untuk Input Nilai</h3>
+    
+    <!-- Info Box -->
+    <div class="mb-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded-r">
+        <div class="flex items-start">
+            <svg class="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+            </svg>
+            <p class="ml-3 text-sm text-blue-700">
+                Jumlah mahasiswa yang ditampilkan adalah mahasiswa per kelas. Klik card untuk input nilai.
+            </p>
+        </div>
+    </div>
+    
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <?php if (!empty($jadwal_mengajar)): ?>
             <?php foreach ($jadwal_mengajar as $jadwal): ?>
@@ -82,7 +114,7 @@
                         <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
                         </svg>
-                        <?= $jadwal['jumlah_mahasiswa'] ?? '0' ?> mahasiswa
+                        <?= $jadwal['jumlah_mahasiswa'] ?? '' ?> mahasiswa
                     </div>
                     <div class="flex items-center justify-center py-2 border-t border-gray-100 group-hover:border-yellow-200">
                         <span class="text-xs text-gray-500 group-hover:text-yellow-600 font-medium">Klik untuk input nilai</span>
@@ -105,9 +137,9 @@
 </div>
 
 <!-- Modal Input Nilai -->
-<div id="nilai-modal" class="fixed inset-0 z-50 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+<div id="nilai-modal" class="fixed inset-0 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true" style="z-index: 99999 !important;">
     <!-- Background overlay -->
-    <div class="fixed inset-0 bg-gray-900 bg-opacity-50 transition-opacity" aria-hidden="true" onclick="closeNilaiModal()"></div>
+    <div class="modal-overlay" aria-hidden="true" onclick="closeNilaiModal()"></div>
     
     <!-- Modal container -->
     <div class="modal-container">
@@ -310,10 +342,22 @@
                     'Content-Type': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
+                console.log('Response data:', data); // Debug log
+                
                 if (data.success) {
                     mahasiswaData = data.mahasiswa || [];
+                    
+                    if (mahasiswaData.length === 0) {
+                        window.toast.warning('⚠️ Tidak ada mahasiswa yang terdaftar di kelas ini');
+                    }
+                    
                     renderModalContent();
                     updateModalClassInfo(data.jadwal);
                 } else {
@@ -322,53 +366,13 @@
                 }
             })
             .catch(error => {
-                console.error('Error:', error);
-                // Fallback to sample data for development
-                loadSampleData(jadwalId);
+                console.error('Error loading mahasiswa:', error);
+                window.toast.error('❌ Terjadi kesalahan saat memuat data mahasiswa');
+                closeNilaiModal();
             });
     }
 
-    function loadSampleData(jadwalId) {
-        // Sample data as fallback
-        const sampleData = {
-            1: {
-                title: 'Pemrograman Web A',
-                info: 'Pemrograman Web (3 SKS) - Senin, 08:00-10:30',
-                mahasiswa: [
-                    { nim: '2021001', nama: 'Ahmad Rizki Pratama', nilai_angka: '', nilai_huruf: '' },
-                    { nim: '2021002', nama: 'Siti Nurhaliza', nilai_angka: '85', nilai_huruf: 'A' },
-                    { nim: '2021003', nama: 'Budi Santoso', nilai_angka: '', nilai_huruf: '' },
-                    { nim: '2021004', nama: 'Dewi Sartika', nilai_angka: '78', nilai_huruf: 'B+' },
-                    { nim: '2021005', nama: 'Eko Prasetyo', nilai_angka: '', nilai_huruf: '' }
-                ]
-            },
-            2: {
-                title: 'Basis Data B',
-                info: 'Sistem Basis Data (3 SKS) - Rabu, 13:00-15:30',
-                mahasiswa: [
-                    { nim: '2021006', nama: 'Fitri Handayani', nilai_angka: '90', nilai_huruf: 'A' },
-                    { nim: '2021007', nama: 'Gilang Ramadhan', nilai_angka: '', nilai_huruf: '' },
-                    { nim: '2021008', nama: 'Hana Pertiwi', nilai_angka: '72', nilai_huruf: 'B' },
-                    { nim: '2021009', nama: 'Indra Kusuma', nilai_angka: '', nilai_huruf: '' }
-                ]
-            },
-            3: {
-                title: 'Algoritma C',
-                info: 'Algoritma dan Pemrograman (2 SKS) - Jumat, 10:00-11:40',
-                mahasiswa: [
-                    { nim: '2021010', nama: 'Joko Widodo', nilai_angka: '', nilai_huruf: '' },
-                    { nim: '2021011', nama: 'Kartika Sari', nilai_angka: '65', nilai_huruf: 'B-' },
-                    { nim: '2021012', nama: 'Lestari Wulan', nilai_angka: '', nilai_huruf: '' }
-                ]
-            }
-        };
 
-        const selectedData = sampleData[jadwalId] || sampleData[1];
-        mahasiswaData = selectedData.mahasiswa;
-
-        renderModalContent();
-        updateModalClassInfo(selectedData);
-    }
 
     function updateModalClassInfo(jadwal) {
         if (jadwal && jadwal.nama_kelas) {
@@ -469,17 +473,15 @@
         if (!nilaiAngka || nilaiAngka === '') return '';
 
         const nilai = parseFloat(nilaiAngka);
-        if (nilai >= 85) return 'A';
-        if (nilai >= 80) return 'A-';
-        if (nilai >= 75) return 'B+';
-        if (nilai >= 70) return 'B';
-        if (nilai >= 65) return 'B-';
-        if (nilai >= 60) return 'C+';
-        if (nilai >= 55) return 'C';
-        if (nilai >= 50) return 'C-';
-        if (nilai >= 45) return 'D+';
-        if (nilai >= 40) return 'D';
-        return 'E';
+        // Sesuaikan dengan tabel nilai_mutu
+        // A = 4.00, A- = 3.50, B = 3.00, B- = 2.50, C = 2.00, D = 1.00, E = 0.00
+        if (nilai >= 85) return 'A';      // 85-100
+        if (nilai >= 80) return 'A-';     // 80-84
+        if (nilai >= 70) return 'B';      // 70-79
+        if (nilai >= 65) return 'B-';     // 65-69
+        if (nilai >= 55) return 'C';      // 55-64 (Batas Lulus)
+        if (nilai >= 40) return 'D';      // 40-54
+        return 'E';                        // 0-39
     }
 
     function getNilaiHurufClass(nilaiHuruf) {
@@ -487,15 +489,11 @@
             case 'A':
             case 'A-':
                 return 'bg-green-100 text-green-800';
-            case 'B+':
             case 'B':
             case 'B-':
                 return 'bg-blue-100 text-blue-800';
-            case 'C+':
             case 'C':
-            case 'C-':
                 return 'bg-yellow-100 text-yellow-800';
-            case 'D+':
             case 'D':
                 return 'bg-orange-100 text-orange-800';
             case 'E':
@@ -508,12 +506,14 @@
     function getStatus(nilaiAngka) {
         if (!nilaiAngka || nilaiAngka === '') return 'Belum Diisi';
         const nilai = parseFloat(nilaiAngka);
+        // Batas lulus adalah C (55)
         return nilai >= 55 ? 'Lulus' : 'Tidak Lulus';
     }
 
     function getStatusClass(nilaiAngka) {
         if (!nilaiAngka || nilaiAngka === '') return 'bg-gray-100 text-gray-800';
         const nilai = parseFloat(nilaiAngka);
+        // Batas lulus adalah C (55)
         return nilai >= 55 ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800';
     }
 
@@ -534,12 +534,23 @@
 
     function saveNilai() {
         // Validate that at least some grades are entered
-        const hasGrades = mahasiswaData.some(m => m.nilai_angka !== '');
+        const hasGrades = mahasiswaData.some(m => m.nilai_angka && m.nilai_angka !== '');
 
         if (!hasGrades) {
             window.toast.warning('⚠️ Harap isi minimal satu nilai sebelum menyimpan', 4000);
             return;
         }
+
+        // Filter only mahasiswa with nilai
+        const nilaiToSave = mahasiswaData
+            .filter(m => m.nilai_angka && m.nilai_angka !== '')
+            .map(m => ({
+                nim: m.nim,
+                nilai_angka: parseFloat(m.nilai_angka),
+                nilai_huruf: m.nilai_huruf
+            }));
+
+        console.log('Saving nilai:', nilaiToSave); // Debug log
 
         // Show loading
         const loadingToast = window.toast.info('💾 Menyimpan nilai...', 10000);
@@ -549,17 +560,23 @@
                 method: 'POST',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': '<?= csrf_hash() ?>'
+                    'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     jadwal_id: selectedJadwalId,
-                    nilai: mahasiswaData
+                    nilai: nilaiToSave
                 })
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 window.toast.remove(loadingToast);
+                
+                console.log('Save response:', data); // Debug log
                 
                 if (data.success) {
                     window.toast.success('✅ ' + data.message, 3000);
@@ -570,17 +587,17 @@
                         });
                     }
 
-                    // Close modal after successful save
+                    // Reload data to show updated values
                     setTimeout(() => {
-                        closeNilaiModal();
-                    }, 2000);
+                        loadMahasiswaData(selectedJadwalId);
+                    }, 1000);
                 } else {
                     window.toast.error('❌ ' + (data.message || 'Gagal menyimpan nilai'));
                 }
             })
             .catch(error => {
                 window.toast.remove(loadingToast);
-                console.error('Error:', error);
+                console.error('Error saving nilai:', error);
                 window.toast.error('❌ Terjadi kesalahan saat menyimpan nilai');
             });
     }

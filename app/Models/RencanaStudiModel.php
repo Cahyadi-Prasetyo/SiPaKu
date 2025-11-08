@@ -81,6 +81,8 @@ class RencanaStudiModel extends Model
 
     public function getTotalMahasiswaByDosen($nidn)
     {
+        // Menghitung mahasiswa unik (DISTINCT)
+        // Jika mahasiswa mengambil 2 mata kuliah, tetap terhitung 1x
         return $this->select('COUNT(DISTINCT rencana_studi.nim) as total')
             ->join('jadwal', 'jadwal.id = rencana_studi.id_jadwal')
             ->where('jadwal.nidn', $nidn)
