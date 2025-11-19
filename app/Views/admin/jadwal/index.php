@@ -1049,13 +1049,12 @@ function openJadwalModal(jadwalId = null) {
         submitIcon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>';
     }
     
-    // Load dropdown data
-    loadDropdownData();
-    
-    // Load jadwal data if editing
-    if (isEditMode) {
-        loadJadwalData(jadwalId);
-    }
+    // Load dropdown data first, then load jadwal data if editing
+    loadDropdownData().then(() => {
+        if (isEditMode) {
+            loadJadwalData(jadwalId);
+        }
+    });
     
     // Add event listeners for real-time conflict checking
     setTimeout(() => {
@@ -1152,7 +1151,7 @@ function closeJadwalModal() {
 
 // Load jadwal data for editing
 function loadJadwalData(jadwalId) {
-    console.log('Loading jadwal data for ID:', jadwalId);
+    console.log('=== Loading jadwal data for ID:', jadwalId, '===');
     
     fetch(baseUrl + '/admin/jadwal/' + jadwalId, {
         method: 'GET',
@@ -1160,36 +1159,84 @@ function loadJadwalData(jadwalId) {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Jadwal response status:', response.status);
+        return response.json();
+    })
     .then(data => {
-        console.log('Jadwal data loaded:', data);
+        console.log('Jadwal data received:', data);
         if (data.success && data.data) {
             const jadwal = data.data;
             
-            // Populate form fields
+            // Populate form fields immediately
             document.getElementById('jadwal_id').value = jadwal.id || '';
             document.getElementById('nama_kelas').value = jadwal.nama_kelas || '';
             document.getElementById('hari').value = jadwal.hari || '';
             document.getElementById('jam').value = jadwal.jam || '';
             
-            // Set dropdown values after they are loaded
-            setTimeout(() => {
-                if (jadwal.id_mata_kuliah) {
-                    document.getElementById('id_mata_kuliah').value = jadwal.id_mata_kuliah;
+            console.log('Form fields populated');
+            
+            // Set dropdown values immediately (dropdowns are already loaded)
+            if (jadwal.id_mata_kuliah) {
+                const mataKuliahSelect = document.getElementById('id_mata_kuliah');
+                console.log('Available Mata Kuliah options:', mataKuliahSelect.options.length);
+                console.log('Trying to set Mata Kuliah to:', jadwal.id_mata_kuliah);
+                
+                // Log all available options
+                for (let i = 0; i < mataKuliahSelect.options.length; i++) {
+                    console.log(`  Option ${i}: value="${mataKuliahSelect.options[i].value}"`);
                 }
-                if (jadwal.nidn) {
-                    document.getElementById('nidn').value = jadwal.nidn;
+                
+                mataKuliahSelect.value = jadwal.id_mata_kuliah;
+                const found = mataKuliahSelect.value === jadwal.id_mata_kuliah.toString();
+                console.log('Set Mata Kuliah - Expected:', jadwal.id_mata_kuliah, 'Actual:', mataKuliahSelect.value, 'Found:', found);
+                
+                if (!found) {
+                    console.error('⚠️ Mata Kuliah value not found in dropdown!');
                 }
-                if (jadwal.id_ruangan) {
-                    document.getElementById('id_ruangan').value = jadwal.id_ruangan;
+            }
+            
+            if (jadwal.nidn) {
+                const dosenSelect = document.getElementById('nidn');
+                console.log('Available Dosen options:', dosenSelect.options.length);
+                console.log('Trying to set Dosen to:', jadwal.nidn);
+                
+                // Log all available options
+                for (let i = 0; i < dosenSelect.options.length; i++) {
+                    console.log(`  Option ${i}: value="${dosenSelect.options[i].value}"`);
                 }
-            }, 500);
+                
+                dosenSelect.value = jadwal.nidn;
+                const found = dosenSelect.value === jadwal.nidn.toString();
+                console.log('Set Dosen - Expected:', jadwal.nidn, 'Actual:', dosenSelect.value, 'Found:', found);
+                
+                if (!found) {
+                    console.error('⚠️ Dosen value not found in dropdown!');
+                }
+            }
+            
+            if (jadwal.id_ruangan) {
+                const ruanganSelect = document.getElementById('id_ruangan');
+                console.log('Available Ruangan options:', ruanganSelect.options.length);
+                console.log('Trying to set Ruangan to:', jadwal.id_ruangan);
+                
+                ruanganSelect.value = jadwal.id_ruangan;
+                const found = ruanganSelect.value === jadwal.id_ruangan.toString();
+                console.log('Set Ruangan - Expected:', jadwal.id_ruangan, 'Actual:', ruanganSelect.value, 'Found:', found);
+                
+                if (!found) {
+                    console.error('⚠️ Ruangan value not found in dropdown!');
+                }
+            }
+            
+            console.log('=== ✓ Jadwal data loaded and form populated ===');
         } else {
+            console.error('Invalid jadwal data:', data);
             showError('Gagal memuat data jadwal');
         }
     })
     .catch(error => {
-        console.error('Error loading jadwal data:', error);
+        console.error('=== ✗ Error loading jadwal data ===', error);
         showError('Terjadi kesalahan saat memuat data jadwal');
     });
 }
@@ -1198,74 +1245,164 @@ function loadJadwalData(jadwalId) {
 
 // Load dropdown data
 function loadDropdownData() {
-    // Load Mata Kuliah
-    fetch(baseUrl + '/admin/jadwal/getMataKuliah', {
+    console.log('=== Starting loadDropdownData ===');
+    console.log('Base URL:', baseUrl);
+    
+    // Show loading state
+    const mataKuliahSelect = document.getElementById('id_mata_kuliah');
+    const dosenSelect = document.getElementById('nidn');
+    const ruanganSelect = document.getElementById('id_ruangan');
+    
+    mataKuliahSelect.innerHTML = '<option value="">Loading...</option>';
+    dosenSelect.innerHTML = '<option value="">Loading...</option>';
+    ruanganSelect.innerHTML = '<option value="">Loading...</option>';
+    
+    // Return a Promise that resolves when all dropdowns are loaded
+    const mataKuliahPromise = fetch(baseUrl + '/admin/jadwal/getMataKuliah', {
         method: 'GET',
         headers: {
-            'X-Requested-With': 'XMLHttpRequest'
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Mata Kuliah response status:', response.status);
+        console.log('Mata Kuliah response headers:', response.headers.get('content-type'));
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        // Clone response to read it twice
+        const clonedResponse = response.clone();
+        return response.text().then(text => {
+            console.log('Raw response text:', text.substring(0, 500)); // First 500 chars
+            try {
+                return JSON.parse(text);
+            } catch (e) {
+                console.error('Failed to parse JSON:', e);
+                console.error('Full response:', text);
+                throw new Error('Invalid JSON response');
+            }
+        });
+    })
     .then(data => {
+        console.log('Mata Kuliah data received:', data);
+        console.log('Data type:', typeof data);
+        console.log('Data keys:', Object.keys(data));
+        console.log('data.success:', data.success);
+        console.log('data.data:', data.data);
+        console.log('Is data.data an array?', Array.isArray(data.data));
+        
         const select = document.getElementById('id_mata_kuliah');
         select.innerHTML = '<option value="">Pilih Mata Kuliah</option>';
         
-        if (data.success && data.data) {
+        if (data.success && data.data && Array.isArray(data.data)) {
+            console.log('Processing', data.data.length, 'mata kuliah items');
             data.data.forEach(mk => {
                 const option = document.createElement('option');
                 option.value = mk.id_mata_kuliah;
                 option.textContent = `${mk.kode_mata_kuliah} - ${mk.nama_mata_kuliah}`;
                 select.appendChild(option);
             });
+            console.log('✓ Mata Kuliah loaded:', data.data.length, 'items');
+        } else {
+            console.error('Invalid mata kuliah data structure:', data);
+            console.error('Full data object:', JSON.stringify(data, null, 2));
         }
     })
-    .catch(error => console.error('Error loading mata kuliah:', error));
+    .catch(error => {
+        console.error('✗ Error loading mata kuliah:', error);
+        const select = document.getElementById('id_mata_kuliah');
+        select.innerHTML = '<option value="">Error loading data</option>';
+        throw error;
+    });
     
     // Load Dosen
-    fetch(baseUrl + '/admin/jadwal/getDosen', {
+    const dosenPromise = fetch(baseUrl + '/admin/jadwal/getDosen', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Dosen response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Dosen data received:', data);
         const select = document.getElementById('nidn');
         select.innerHTML = '<option value="">Pilih Dosen</option>';
         
-        if (data.success && data.data) {
+        if (data.success && data.data && Array.isArray(data.data)) {
+            console.log('Processing', data.data.length, 'dosen items');
             data.data.forEach(dosen => {
                 const option = document.createElement('option');
                 option.value = dosen.nidn;
                 option.textContent = `${dosen.nidn} - ${dosen.nama}`;
                 select.appendChild(option);
             });
+            console.log('✓ Dosen loaded:', data.data.length, 'items');
+        } else {
+            console.error('Invalid dosen data structure:', data);
         }
     })
-    .catch(error => console.error('Error loading dosen:', error));
+    .catch(error => {
+        console.error('✗ Error loading dosen:', error);
+        const select = document.getElementById('nidn');
+        select.innerHTML = '<option value="">Error loading data</option>';
+        throw error;
+    });
     
     // Load Ruangan
-    fetch(baseUrl + '/admin/jadwal/getRuangan', {
+    const ruanganPromise = fetch(baseUrl + '/admin/jadwal/getRuangan', {
         method: 'GET',
         headers: {
             'X-Requested-With': 'XMLHttpRequest'
         }
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Ruangan response status:', response.status);
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
     .then(data => {
+        console.log('Ruangan data received:', data);
         const select = document.getElementById('id_ruangan');
         select.innerHTML = '<option value="">Pilih Ruangan</option>';
         
-        if (data.success && data.data) {
+        if (data.success && data.data && Array.isArray(data.data)) {
+            console.log('Processing', data.data.length, 'ruangan items');
             data.data.forEach(ruangan => {
                 const option = document.createElement('option');
                 option.value = ruangan.id_ruangan;
                 option.textContent = ruangan.nama_ruangan;
                 select.appendChild(option);
             });
+            console.log('✓ Ruangan loaded:', data.data.length, 'items');
+        } else {
+            console.error('Invalid ruangan data structure:', data);
         }
     })
-    .catch(error => console.error('Error loading ruangan:', error));
+    .catch(error => {
+        console.error('✗ Error loading ruangan:', error);
+        const select = document.getElementById('id_ruangan');
+        select.innerHTML = '<option value="">Error loading data</option>';
+        throw error;
+    });
+    
+    // Wait for all dropdowns to load
+    return Promise.all([mataKuliahPromise, dosenPromise, ruanganPromise])
+        .then(() => {
+            console.log('=== ✓ All dropdowns loaded successfully ===');
+        })
+        .catch(error => {
+            console.error('=== ✗ Error loading one or more dropdowns ===', error);
+            // Don't throw, allow partial success
+        });
 }
 
 

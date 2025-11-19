@@ -74,15 +74,17 @@ $routes->group('admin', ['filter' => 'auth:admin'], function($routes) {
     $routes->group('jadwal', function($routes) {
         $routes->get('/', 'Admin\Jadwal::index');
         $routes->post('/', 'Admin\Jadwal::create');
-        $routes->get('(:segment)', 'Admin\Jadwal::show/$1');
-        $routes->post('update/(:segment)', 'Admin\Jadwal::update/$1');
-        $routes->delete('(:segment)', 'Admin\Jadwal::delete/$1');
         
-        // AJAX endpoints for jadwal
+        // AJAX endpoints for jadwal - MUST BE BEFORE (:segment) route
         $routes->get('getMataKuliah', 'Admin\Jadwal::getMataKuliah');
         $routes->get('getDosen', 'Admin\Jadwal::getDosen');
         $routes->get('getRuangan', 'Admin\Jadwal::getRuangan');
         $routes->post('checkConflict', 'Admin\Jadwal::checkConflict');
+        
+        // Generic routes with segments - MUST BE AFTER specific routes
+        $routes->get('(:segment)', 'Admin\Jadwal::show/$1');
+        $routes->post('update/(:segment)', 'Admin\Jadwal::update/$1');
+        $routes->delete('(:segment)', 'Admin\Jadwal::delete/$1');
     });
     
     // User Management & Bulk Operations
