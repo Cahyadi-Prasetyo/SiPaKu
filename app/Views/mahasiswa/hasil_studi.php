@@ -96,23 +96,86 @@
 <!-- Keterangan Nilai -->
 <div class="mt-6 bg-white rounded-lg shadow-lg p-6">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">Keterangan Nilai</h3>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Konversi Nilai Huruf ke Bobot -->
         <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Konversi Nilai Huruf ke Bobot:</h4>
-            <div class="space-y-1 text-sm text-gray-600">
-                <div class="flex justify-between"><span>A = 4.0</span><span>B+ = 3.25</span><span>C+ = 2.25</span><span>D+ = 1.25</span></div>
-                <div class="flex justify-between"><span>A- = 3.5</span><span>B = 3.0</span><span>C = 2.0</span><span>D = 1.0</span></div>
-                <div class="flex justify-between"><span></span><span>B- = 2.75</span><span>C- = 1.75</span><span>E = 0.0</span></div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Konversi Nilai Huruf ke Bobot
+            </h4>
+            <div class="grid grid-cols-2 gap-x-6 gap-y-2 text-sm text-gray-700">
+                <div class="flex items-center justify-between px-3 py-1.5 bg-green-50 rounded">
+                    <span class="font-medium">A</span>
+                    <span class="text-gray-600">= 4.00</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-green-50 rounded">
+                    <span class="font-medium">A-</span>
+                    <span class="text-gray-600">= 3.50</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-blue-50 rounded">
+                    <span class="font-medium">B</span>
+                    <span class="text-gray-600">= 3.00</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-blue-50 rounded">
+                    <span class="font-medium">B-</span>
+                    <span class="text-gray-600">= 2.50</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-yellow-50 rounded">
+                    <span class="font-medium">C</span>
+                    <span class="text-gray-600">= 2.00</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-orange-50 rounded">
+                    <span class="font-medium">D</span>
+                    <span class="text-gray-600">= 1.00</span>
+                </div>
+                <div class="flex items-center justify-between px-3 py-1.5 bg-red-50 rounded col-span-2">
+                    <span class="font-medium">E</span>
+                    <span class="text-gray-600">= 0.00</span>
+                </div>
             </div>
         </div>
+        
+        <!-- Predikat IPK -->
         <div>
-            <h4 class="text-sm font-medium text-gray-700 mb-2">Predikat IPK:</h4>
-            <div class="space-y-1 text-sm text-gray-600">
-                <div>3.51 - 4.00 = Dengan Pujian (Cum Laude)</div>
-                <div>3.01 - 3.50 = Sangat Memuaskan</div>
-                <div>2.76 - 3.00 = Memuaskan</div>
-                <div>2.00 - 2.75 = Cukup</div>
-                <div>&lt; 2.00 = Kurang</div>
+            <h4 class="text-sm font-semibold text-gray-700 mb-3 flex items-center">
+                <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                </svg>
+                Predikat IPK
+            </h4>
+            <div class="space-y-2 text-sm">
+                <div class="flex items-start px-4 py-2.5 bg-purple-50 rounded-lg border-l-4 border-purple-500">
+                    <div class="flex-1">
+                        <div class="font-semibold text-purple-900">3.51 - 4.00</div>
+                        <div class="text-purple-700 text-xs mt-0.5">Dengan Pujian (Cum Laude)</div>
+                    </div>
+                </div>
+                <div class="flex items-start px-4 py-2.5 bg-green-50 rounded-lg border-l-4 border-green-500">
+                    <div class="flex-1">
+                        <div class="font-semibold text-green-900">3.01 - 3.50</div>
+                        <div class="text-green-700 text-xs mt-0.5">Sangat Memuaskan</div>
+                    </div>
+                </div>
+                <div class="flex items-start px-4 py-2.5 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                    <div class="flex-1">
+                        <div class="font-semibold text-blue-900">2.76 - 3.00</div>
+                        <div class="text-blue-700 text-xs mt-0.5">Memuaskan</div>
+                    </div>
+                </div>
+                <div class="flex items-start px-4 py-2.5 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
+                    <div class="flex-1">
+                        <div class="font-semibold text-yellow-900">2.00 - 2.75</div>
+                        <div class="text-yellow-700 text-xs mt-0.5">Cukup</div>
+                    </div>
+                </div>
+                <div class="flex items-start px-4 py-2.5 bg-red-50 rounded-lg border-l-4 border-red-500">
+                    <div class="flex-1">
+                        <div class="font-semibold text-red-900">&lt; 2.00</div>
+                        <div class="text-red-700 text-xs mt-0.5">Kurang</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
